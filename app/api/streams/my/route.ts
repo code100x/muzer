@@ -4,25 +4,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     const session = await getServerSession();
-     // TODO: You can get rid of the db call here 
-     const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
 
-    if (!user) {
+    // session contains user information or not
+    if (!session || !session.user?.email) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
             status: 403
-        })
+        });
     }
 
-    
+    // get all streams associated with the user by their email
     const streams = await prismaClient.stream.findMany({
         where: {
-            userId: user.id
+            user: {
+                email: session.user.email
+            }
         },
         include: {
             _count: {
@@ -32,18 +29,19 @@ export async function GET(req: NextRequest) {
             },
             upvotes: {
                 where: {
-                    userId: user.id
+                    user: {
+                        email: session.user.email
+                    }
                 }
             }
         }
-    })
-    
+    });
 
     return NextResponse.json({
-        streams: streams.map(({_count, ...rest}) => ({
+        streams: streams.map(({ _count, ...rest }) => ({
             ...rest,
             upvotes: _count.upvotes,
-            haveUpvoted: rest.upvotes.length ? true : false
+            haveUpvoted: rest.upvotes.length > 0
         }))
-    })
+    });
 }
