@@ -10,7 +10,7 @@ export function Appbar() {
             Muzer
         </div>
         <div>
-            {session.data?.user && <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={() => signOut()}>Logout</Button>}
+            {session.data?.user && <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={() => signOut({callbackUrl:"/"})}>Logout</Button>}
             {!session.data?.user &&<Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={() => signIn()}>Signin</Button>}
         </div>
     </div>

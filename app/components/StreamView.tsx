@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 //@ts-ignore
-import { ChevronUp, ChevronDown, ThumbsDown, Play, Share2, Axis3DIcon } from "lucide-react"
+import { ChevronUp, ChevronDown, ThumbsDown, Play, Share2, Axis3DIcon  } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Appbar } from '../components/Appbar'
@@ -206,7 +206,8 @@ export default function StreamView({
                                     variant="outline" 
                                     size="sm"
                                     onClick={() => handleVote(video.id, video.haveUpvoted ? false : true)}
-                                    className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                                    className={`flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700
+                                        ${video.haveUpvoted ? "bg-purple-700 hover:bg-purple-800" : ""}`}
                                     >
                                     {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                                     <span>{video.upvotes}</span>
