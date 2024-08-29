@@ -171,7 +171,7 @@ export default function StreamView({
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
         <Appbar />
         <div className='flex justify-center'>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8 px-10">
                 <div className='col-span-3'>
                     <div className="space-y-4">
                         <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
@@ -221,7 +221,7 @@ export default function StreamView({
                             onChange={(e) => setInputLink(e.target.value)}
                             className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
                         />
-                        <Button disabled={loading} onClick={handleSubmit} type="submit" className="w-full bg-purple-700 hover:bg-purple-800 text-white">{loading ? "Loading..." : "Add to Queue"}</Button>
+                        <Button disabled={loading || !(inputLink && inputLink.match(YT_REGEX))} onClick={handleSubmit} type="submit" className={`w-full bg-purple-700 hover:bg-purple-800 text-white`}>{loading ? "Loading..." : "Add to Queue"}</Button>
                         </form>
 
                         {inputLink && inputLink.match(YT_REGEX) && !loading && (
