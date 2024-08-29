@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "studio": "npx prisma studio",
+    "prisma:migrate": "prisma migrate dev deploy",
+    "prisma:generate": "prisma generate",
+    "prisma:docker": "pnpm prisma:migrate && pnpm prisma:generate",
+    "dev:docker": "pnpm prisma:docker & pnpm dev"
   },
   "dependencies": {
     "@prisma/client": "5.19.0",

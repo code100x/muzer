@@ -1,15 +1,15 @@
-FROM node:22.6.0
+FROM node:22-alpine
 
-WORKDIR /app
-COPY package.json .
+WORKDIR /usr/src/app
 
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+
+COPY prisma ./prisma
+
+RUN npm install pnpm -g
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN DATABASE_URL=$DATABASE_URL npx prisma generate
-RUN DATABASE_URL=$DATABASE_URL npm run build
-
-EXPOSE 3000
-
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "dev:docker"]
