@@ -1,0 +1,16 @@
+# Ignore configuration files
+tailwind.config.ts
+tsconfig.json
+next.config.mjs
+next-env.d.ts
+Dockerfile
+
+# Ignore build output and dependency directories
+node_modules/
+.next/
+dist/
+coverage/
+
+# Ignore other specific files
+package-lock.json
+yarn.lock

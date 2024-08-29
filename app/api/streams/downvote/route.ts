@@ -1,7 +1,7 @@
-import db from "@/app/lib/db";
-import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import db from '@/app/lib/db';
+import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const UpvoteSchema = z.object({
   streamId: z.string(),
@@ -13,18 +13,18 @@ export async function POST(req: NextRequest) {
   // TODO: You can get rid of the db call here
   const user = await db.user.findFirst({
     where: {
-      email: session?.user?.email ?? "",
+      email: session?.user?.email ?? '',
     },
   });
 
   if (!user) {
     return NextResponse.json(
       {
-        message: "Unauthenticated",
+        message: 'Unauthenticated',
       },
       {
         status: 403,
-      }
+      },
     );
   }
 
@@ -40,16 +40,17 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      message: "Done!",
+      message: 'Done!',
     });
   } catch (e) {
+    console.log(e);
     return NextResponse.json(
       {
-        message: "Error while upvoting",
+        message: 'Error while upvoting',
       },
       {
         status: 403,
-      }
+      },
     );
   }
 }

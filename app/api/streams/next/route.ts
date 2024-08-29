@@ -1,27 +1,27 @@
-import db from "@/app/lib/db";
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import db from '@/app/lib/db';
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   const session = await getServerSession();
   // TODO: You can get rid of the db call here
   const user = await db.user.findFirst({
     where: {
-      email: session?.user?.email ?? "",
+      email: session?.user?.email ?? '',
     },
   });
 
   if (!user) {
     return NextResponse.json(
       {
-        message: "Unauthenticated",
+        message: 'Unauthenticated',
       },
       {
         status: 403,
-      }
+      },
     );
   }
-  console.log("before first call");
+  console.log('before first call');
 
   const mostUpvotedStream = await db.stream.findFirst({
     where: {
@@ -30,11 +30,11 @@ export async function GET() {
     },
     orderBy: {
       upvotes: {
-        _count: "desc",
+        _count: 'desc',
       },
     },
   });
-  console.log("after first call");
+  console.log('after first call');
   console.log(mostUpvotedStream?.id);
 
   await Promise.all([
@@ -53,7 +53,7 @@ export async function GET() {
     }),
     db.stream.update({
       where: {
-        id: mostUpvotedStream?.id ?? "",
+        id: mostUpvotedStream?.id ?? '',
       },
       data: {
         played: true,

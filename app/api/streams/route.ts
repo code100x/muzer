@@ -1,10 +1,10 @@
-import db from "@/app/lib/db";
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import db from '@/app/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 //@ts-ignore
-import { YT_REGEX } from "@/app/lib/utils";
-import { getServerSession } from "next-auth";
-import youtubesearchapi from "youtube-search-api";
+import { YT_REGEX } from '@/app/lib/utils';
+import { getServerSession } from 'next-auth';
+import youtubesearchapi from 'youtube-search-api';
 
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
@@ -20,21 +20,21 @@ export async function POST(req: NextRequest) {
     if (!isYt) {
       return NextResponse.json(
         {
-          message: "Wrong URL format",
+          message: 'Wrong URL format',
         },
         {
           status: 411,
-        }
+        },
       );
     }
 
-    const extractedId = data.url.split("?v=")[1];
+    const extractedId = data.url.split('?v=')[1];
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
 
     const thumbnails = res.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
-      a.width < b.width ? -1 : 1
+      a.width < b.width ? -1 : 1,
     );
 
     const existingActiveStream = await db.stream.count({
@@ -46,11 +46,11 @@ export async function POST(req: NextRequest) {
     if (existingActiveStream > MAX_QUEUE_LEN) {
       return NextResponse.json(
         {
-          message: "Already at limit",
+          message: 'Already at limit',
         },
         {
           status: 411,
-        }
+        },
       );
     }
 
@@ -59,16 +59,16 @@ export async function POST(req: NextRequest) {
         userId: data.creatorId,
         url: data.url,
         extractedId,
-        type: "Youtube",
-        title: res.title ?? "Cant find video",
+        type: 'Youtube',
+        title: res.title ?? 'Cant find video',
         smallImg:
           (thumbnails.length > 1
             ? thumbnails[thumbnails.length - 2].url
             : thumbnails[thumbnails.length - 1].url) ??
-          "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+          'https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg',
         bigImg:
           thumbnails[thumbnails.length - 1].url ??
-          "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+          'https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg',
       },
     });
 
@@ -81,44 +81,44 @@ export async function POST(req: NextRequest) {
     console.log(e);
     return NextResponse.json(
       {
-        message: "Error while adding a stream",
+        message: 'Error while adding a stream',
       },
       {
         status: 411,
-      }
+      },
     );
   }
 }
 
 export async function GET(req: NextRequest) {
-  const creatorId = req.nextUrl.searchParams.get("creatorId");
+  const creatorId = req.nextUrl.searchParams.get('creatorId');
   const session = await getServerSession();
   // TODO: You can get rid of the db call here
   const user = await db.user.findFirst({
     where: {
-      email: session?.user?.email ?? "",
+      email: session?.user?.email ?? '',
     },
   });
 
   if (!user) {
     return NextResponse.json(
       {
-        message: "Unauthenticated",
+        message: 'Unauthenticated',
       },
       {
         status: 403,
-      }
+      },
     );
   }
 
   if (!creatorId) {
     return NextResponse.json(
       {
-        message: "Error",
+        message: 'Error',
       },
       {
         status: 411,
-      }
+      },
     );
   }
 
