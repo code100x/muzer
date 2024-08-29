@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { ChevronUp, ChevronDown, Share2, Play } from "lucide-react"
+import { ChevronUp, ChevronDown, Share2, Play, Trash2, X } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Appbar } from './Appbar'
@@ -241,124 +241,124 @@ export default function StreamView({
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
+        <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-200">
             <Appbar />
-            <div className='flex justify-center'>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
-                    <div className='col-span-3'>
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
-                                <div className="space-x-2">
-                                    <Button onClick={handleShare} className="bg-purple-700 hover:bg-purple-800 text-white">
-                                        <Share2 className="mr-2 h-4 w-4" /> Share
-                                    </Button>
-                                    {isCreator && (
-                                        <Button onClick={() => setIsEmptyQueueDialogOpen(true)} className="bg-red-600 hover:bg-red-700 text-white">
-                                            Empty Queue
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                            {queue.length === 0 && (
-                                <Card className="bg-gray-900 border-gray-800 w-full">
-                                    <CardContent className="p-4">
-                                        <p className="text-center py-8 text-gray-400">No videos in queue</p>
-                                    </CardContent>
-                                </Card>
-                            )}
-                            {queue.map((video) => (
-                                <Card key={video.id} className="bg-gray-900 border-gray-800">
-                                    <CardContent className="p-4 flex items-center space-x-4">
-                                        <img 
-                                            src={video.smallImg}
-                                            alt={`Thumbnail for ${video.title}`}
-                                            className="w-30 h-20 object-cover rounded"
-                                        />
-                                        <div className="flex-grow">
-                                            <h3 className="font-semibold text-white">{video.title}</h3>
-                                            <div className="flex items-center space-x-2 mt-2">
-                                                <Button 
-                                                    variant="outline" 
-                                                    size="sm"
-                                                    onClick={() => handleVote(video.id, !video.haveUpvoted)}
-                                                    className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                                                >
-                                                    {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                                                    <span>{video.upvotes}</span>
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        {isCreator && (
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm"
-                                                onClick={() => removeSong(video.id)}
-                                                className="bg-red-600 hover:bg-red-700 text-white"
-                                            >
-                                                Remove
-                                            </Button>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                    <div className='col-span-2'>
-                        <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-xl font-bold text-white">Add a song</h1>
-                            </div>
-                            <form onSubmit={handleSubmit} className="space-y-2">
-                                <Input
-                                    type="text"
-                                    placeholder="Paste YouTube link here"
-                                    value={inputLink}
-                                    onChange={(e) => setInputLink(e.target.value)}
-                                    className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
-                                />
-                                <Button disabled={loading} type="submit" className="w-full bg-purple-700 hover:bg-purple-800 text-white">
-                                    {loading ? "Loading..." : "Add to Queue"}
+            <div className='flex justify-center px-4 py-8'>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 w-full max-w-7xl">
+                    <div className='lg:col-span-2 space-y-6'>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                            <h2 className="text-3xl font-bold text-white">Upcoming Songs</h2>
+                            <div className="flex space-x-2">
+                                <Button onClick={handleShare} className="bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
+                                    <Share2 className="mr-2 h-4 w-4" /> Share
                                 </Button>
-                            </form>
-                            {inputLink && inputLink.match(YT_REGEX) && !loading && (
-                                <Card className="bg-gray-900 border-gray-800">
-                                    <CardContent className="p-4">
-                                        <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
-                                    </CardContent>
-                                </Card>
-                            )}
-                            <div className="space-y-4">
-                                <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-                                <Card className="bg-gray-900 border-gray-800">
-                                    <CardContent className="p-4">
-                                        {currentVideo ? (
-                                            <div>
-                                                {playVideo ? (
-                                                    <div ref={videoPlayerRef} className='w-full' />
-                                                ) : (
-                                                    <>
-                                                        <img 
-                                                            src={currentVideo.bigImg} 
-                                                            className="w-full h-72 object-cover rounded"
-                                                            alt={currentVideo.title}
-                                                        />
-                                                        <p className="mt-2 text-center font-semibold text-white">{currentVideo.title}</p>
-                                                    </>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <p className="text-center py-8 text-gray-400">No video playing</p>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                                {playVideo && (
-                                    <Button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
-                                        <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
+                                {isCreator && (
+                                    <Button 
+                                        onClick={() => setIsEmptyQueueDialogOpen(true)} 
+                                        className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" /> Empty Queue
                                     </Button>
                                 )}
                             </div>
                         </div>
+                        {queue.length === 0 ? (
+                            <Card className="bg-gray-800 border-gray-700 shadow-lg">
+                                <CardContent className="p-6">
+                                    <p className="text-center py-8 text-gray-400">No videos in queue</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="space-y-4">
+                                {queue.map((video) => (
+                                    <Card key={video.id} className="bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
+                                        <CardContent className="p-4 flex items-center space-x-4">
+                                            <img 
+                                                src={video.smallImg}
+                                                alt={`Thumbnail for ${video.title}`}
+                                                className="w-32 h-24 object-cover rounded-md"
+                                            />
+                                            <div className="flex-grow">
+                                                <h3 className="font-semibold text-white text-lg mb-2">{video.title}</h3>
+                                                <div className="flex items-center space-x-2">
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm"
+                                                        onClick={() => handleVote(video.id, !video.haveUpvoted)}
+                                                        className="flex items-center space-x-1 bg-gray-700 text-white border-gray-600 hover:bg-gray-600 transition-colors"
+                                                    >
+                                                        {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                                                        <span>{video.upvotes}</span>
+                                                    </Button>
+                                                    {isCreator && (
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm"
+                                                            onClick={() => removeSong(video.id)}
+                                                            className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className='space-y-6'>
+                        <Card className="bg-gray-800 border-gray-700 shadow-lg">
+                            <CardContent className="p-6 space-y-4">
+                                <h2 className="text-2xl font-bold text-white">Add a song</h2>
+                                <form onSubmit={handleSubmit} className="space-y-3">
+                                    <Input
+                                        type="text"
+                                        placeholder="Paste YouTube link here"
+                                        value={inputLink}
+                                        onChange={(e) => setInputLink(e.target.value)}
+                                        className="bg-gray-700 text-white border-gray-600 placeholder-gray-400"
+                                    />
+                                    <Button disabled={loading} type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-colors">
+                                        {loading ? "Loading..." : "Add to Queue"}
+                                    </Button>
+                                </form>
+                                {inputLink && inputLink.match(YT_REGEX) && !loading && (
+                                    <div className="mt-4">
+                                        <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-gray-800 border-gray-700 shadow-lg">
+                            <CardContent className="p-6 space-y-4">
+                                <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+                                {currentVideo ? (
+                                    <div>
+                                        {playVideo ? (
+                                            <div ref={videoPlayerRef} className='w-full aspect-video' />
+                                        ) : (
+                                            <>
+                                                <img 
+                                                    src={currentVideo.bigImg} 
+                                                    className="w-full aspect-video object-cover rounded-md"
+                                                    alt={currentVideo.title}
+                                                />
+                                                <p className="mt-2 text-center font-semibold text-white">{currentVideo.title}</p>
+                                            </>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-center py-8 text-gray-400">No video playing</p>
+                                )}
+                                {playVideo && (
+                                    <Button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-colors">
+                                        <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </div>
