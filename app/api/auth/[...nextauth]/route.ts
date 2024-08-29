@@ -26,6 +26,9 @@ const handler = NextAuth({
       } catch (e) {}
       return true;
     },
+    async redirect({ url, baseUrl }) {
+      return `${baseUrl}`;
+    },
   },
   pages: {
     signIn: "/signin",
