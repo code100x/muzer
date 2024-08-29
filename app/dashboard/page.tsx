@@ -31,7 +31,14 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 
 const creatorId = "3ce10574-0396-43ac-8274-02882cde607b"
 
-export default function Component() {
+export default async function Component() {
+    try {
+        const data = await fetch("/api/user").then(res => res.json());
   
-    return <StreamView creatorId={creatorId} playVideo={true} />
+        return <StreamView creatorId={data.user.id} playVideo={true} />
+    } catch(e) {
+        return null
+    }
 }
+
+export const dynamic = 'auto'
