@@ -93,6 +93,20 @@ export default function StreamView({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if(!inputLink.match(YT_REGEX)) {
+        toast.error('Invalid YouTube link ', {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        })
+        setLoading(false);
+        setInputLink("");
+        return;
+    }
     const res = await fetch("/api/streams/", {
         method: "POST",
         body: JSON.stringify({
