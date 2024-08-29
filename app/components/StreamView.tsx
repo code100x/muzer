@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 //@ts-ignore
-import { ChevronUp, ChevronDown, ThumbsDown, Play, Share2, Axis3DIcon } from "lucide-react"
+import { ChevronUp, ChevronDown, ThumbsDown, Play, Share2, Axis3DIcon, Trash2 } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Appbar } from '../components/Appbar'
@@ -141,6 +141,19 @@ export default function StreamView({
     }
   }
 
+  const deleteFromQueue = async (url: string) => {
+    // console.log(url)
+    setLoading(true);
+    const res = await fetch("/api/streams/delete", {
+        method: "DELETE",
+        body: JSON.stringify({
+            url
+        })
+    });
+    setQueue([...queue])
+    setLoading(false);
+    setInputLink('')
+  }
   const handleShare = () => {
     const shareableLink = `${window.location.hostname}/creator/${creatorId}`
     navigator.clipboard.writeText(shareableLink).then(() => {
@@ -197,6 +210,7 @@ export default function StreamView({
                                     {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                                     <span>{video.upvotes}</span>
                                     </Button>
+                                    <Trash2 onClick={()=> deleteFromQueue(video.url)}/>
                                 </div>
                                 </div>
                             </CardContent>
