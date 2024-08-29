@@ -13,6 +13,7 @@ import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 //@ts-ignore
 import YouTubePlayer from 'youtube-player';
+import { toast } from "react-toastify";
 
 interface Video {
     "id": string,
@@ -140,29 +141,16 @@ export default function StreamView({
         setPlayNextLoader(false)
     }
   }
-
-    // Centralized toast configuration function
-  const showToast = (type, message) => {
-    toast[type](message, {
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    });
-  };
   
   // Function to handle sharing
   const handleShare = () => {
     const shareableLink = `${window.location.hostname}/creator/${creatorId}`;
     
     navigator.clipboard.writeText(shareableLink).then(() => {
-      showToast('success', 'Link copied to clipboard!');
+      toast.success('Link copied to clipboard!');
     }).catch((err) => {
       console.error('Could not copy text: ', err);
-      showToast('error', 'Failed to copy link. Please try again.');
+      toast.error('Failed to copy link. Please try again.');
     });
   };
 

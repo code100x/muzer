@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { Providers } from "./provider";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css'; // Import toast CSS
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +23,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
           <Providers>
+            <ToastContainer 
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              closeOnClick={true}
+              pauseOnHover={true}
+              draggable={true}
+              progress={undefined}
+            />
             {children}
           </Providers>
         </body>
