@@ -141,31 +141,30 @@ export default function StreamView({
     }
   }
 
+    // Centralized toast configuration function
+  const showToast = (type, message) => {
+    toast[type](message, {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    });
+  };
+  
+  // Function to handle sharing
   const handleShare = () => {
-    const shareableLink = `${window.location.hostname}/creator/${creatorId}`
+    const shareableLink = `${window.location.hostname}/creator/${creatorId}`;
+    
     navigator.clipboard.writeText(shareableLink).then(() => {
-      toast.success('Link copied to clipboard!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      })
-    }, (err) => {
-      console.error('Could not copy text: ', err)
-      toast.error('Failed to copy link. Please try again.', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      })
-    })
-  }
+      showToast('success', 'Link copied to clipboard!');
+    }).catch((err) => {
+      console.error('Could not copy text: ', err);
+      showToast('error', 'Failed to copy link. Please try again.');
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
