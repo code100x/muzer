@@ -4,12 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import React, { useEffect, useRef, useState } from 'react';
 //@ts-ignore
-import {
-  ChevronDown,
-  ChevronUp,
-  Play,
-  Share2,
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, Play, Share2 } from 'lucide-react';
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
 import { toast, ToastContainer } from 'react-toastify';
@@ -121,10 +116,10 @@ export default function StreamView({
         .map((video) =>
           video.id === id
             ? {
-              ...video,
-              upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1,
-              haveUpvoted: !video.haveUpvoted,
-            }
+                ...video,
+                upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1,
+                haveUpvoted: !video.haveUpvoted,
+              }
             : video,
         )
         .sort((a, b) => b.upvotes - a.upvotes),

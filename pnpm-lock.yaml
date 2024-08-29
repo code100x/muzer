@@ -88,7 +88,7 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1(eslint-config-prettier@9.1.0(eslint@8.57.0))(eslint@8.57.0)(prettier@3.3.3)
       husky:
-        specifier: ^9.1.5
+        specifier: ^9.0.7
         version: 9.1.5
       postcss:
         specifier: ^8
