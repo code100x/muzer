@@ -3,21 +3,17 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+// The UpvoteSchema holds both streamId and userId
 const UpvoteSchema = z.object({
     streamId: z.string(),
+    userId: z.string()
 })
 
+// req has - "streamId" & "userId"
 export async function POST(req: NextRequest) {
     const session = await getServerSession();
 
-    // TODO: You can get rid of the db call here 
-    const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
-
-    if (!user) {
+    if (!session) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
@@ -26,11 +22,11 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const data = UpvoteSchema.parse(await req.json());
+        const data = UpvoteSchema.parse(await req.json()); // data contains both streamId and userId
         await prismaClient.upvote.delete({
             where: {
                 userId_streamId: {
-                    userId: user.id,
+                    userId: data.userId,
                     streamId: data.streamId
                 }
             }
