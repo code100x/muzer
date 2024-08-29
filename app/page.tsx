@@ -1,8 +1,10 @@
+"use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 //@ts-ignore
 import { Users, Radio, Headphones } from "lucide-react"
+import { signIn } from "next-auth/react";
 import { Appbar } from "./components/Appbar"
 import { Redirect } from "./components/Redirect"
 
@@ -23,7 +25,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="space-x-4">
-              <Button className="bg-purple-600 text-white hover:bg-purple-700">Get Started</Button>
+              <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={() => signIn()} >Get Started</Button>
               <Button variant="outline" className="text-purple-400 border-purple-400 hover:bg-purple-400 hover:text-gray-900">Learn More</Button>
             </div>
           </div>
