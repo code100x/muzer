@@ -2,3 +2,5 @@
 node_modules
 dist
 .env
+pnpm-lock.yaml
+package-lock.json
