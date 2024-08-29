@@ -11,7 +11,7 @@ export default function Component() {
             try {
                 const response = await fetch("/api/user");
                 const data = await response.json();
-                setCreatorId(data.user.id);
+                setCreatorId(data.user?.id || null);
             } catch (e) {
                 console.error("Error fetching user data:", e);
             } finally {
@@ -24,10 +24,6 @@ export default function Component() {
 
     if (loading) {
         return <div>Loading...</div>;
-    }
-
-    if (!creatorId) {
-        return <div>Error: Unable to load user data</div>;
     }
 
     return <StreamView creatorId={creatorId} playVideo={true} />;
