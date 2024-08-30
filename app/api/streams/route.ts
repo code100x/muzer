@@ -57,9 +57,10 @@ export async function POST(req: NextRequest) {
             const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
             const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
 
-            const recentStreams = await prismaClient.stream.findMany({
+            const userRecentStreams = await prismaClient.stream.count({
                 where: {
                     userId: data.creatorId,
+                    addedBy: user.id,
                     createAt: {
                         gte: tenMinutesAgo
                     }
@@ -67,7 +68,15 @@ export async function POST(req: NextRequest) {
             });
 
             // Check for duplicate song in the last 10 minutes
-            const duplicateSong = recentStreams.find(stream => stream.extractedId === extractedId);
+            const duplicateSong = await prismaClient.stream.findFirst({
+                where: {
+                    userId: data.creatorId,
+                    extractedId: extractedId,
+                    createAt: {
+                        gte: tenMinutesAgo
+                    }
+                }
+            });
             if (duplicateSong) {
                 return NextResponse.json({
                     message: "This song was already added in the last 10 minutes"
@@ -77,10 +86,17 @@ export async function POST(req: NextRequest) {
             }
 
             // Rate limiting checks for non-creator users
-            const userStreams = recentStreams.filter(stream => stream.addedBy === user.id);
-            const streamsLastTwoMinutes = userStreams.filter(stream => stream.createAt >= twoMinutesAgo);
+            const streamsLastTwoMinutes = await prismaClient.stream.count({
+                where: {
+                    userId: data.creatorId,
+                    addedBy: user.id,
+                    createAt: {
+                        gte: twoMinutesAgo
+                    }
+                }
+            });
 
-            if (streamsLastTwoMinutes.length >= 2) {
+            if (streamsLastTwoMinutes >= 2) {
                 return NextResponse.json({
                     message: "Rate limit exceeded: You can only add 2 songs per 2 minutes"
                 }, {
@@ -88,7 +104,7 @@ export async function POST(req: NextRequest) {
                 });
             }
 
-            if (userStreams.length >= 5) {
+            if (userRecentStreams >= 5) {
                 return NextResponse.json({
                     message: "Rate limit exceeded: You can only add 5 songs per 10 minutes"
                 }, {
