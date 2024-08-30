@@ -30,7 +30,7 @@
 3. (optional) Start a PostgreSQL database using Docker:
    ```bash
    docker run -d \
-       --name cms-db \
+       --name muzer-db \
        -e POSTGRES_USER=myuser \
        -e POSTGRES_PASSWORD=mypassword \
        -e POSTGRES_DB=mydatabase \
