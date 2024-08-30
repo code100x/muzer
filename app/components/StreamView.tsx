@@ -29,13 +29,13 @@ interface Video {
     haveUpvoted: boolean
 }
 
-interface CustomSession extends Session {
-    user?: {
-        id?: string
-        name?: string | null
-        email?: string | null
-        image?: string | null
-    }
+interface CustomSession extends Omit<Session, 'user'> {
+    user: {
+        id: string;
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+    };
 }
 
 const REFRESH_INTERVAL_MS = 10 * 1000
