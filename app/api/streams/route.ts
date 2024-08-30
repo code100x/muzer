@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
             }
 
             // Rate limiting checks for non-creator users
-            const userStreams = recentStreams.filter(stream => stream.userId === user.id);
+            const userStreams = recentStreams.filter(stream => stream.addedBy === user.id);
             const streamsLastTwoMinutes = userStreams.filter(stream => stream.createAt >= twoMinutesAgo);
 
             if (streamsLastTwoMinutes.length >= 2) {
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
                 });
             }
 
-            if (recentStreams.length >= 5) {
+            if (userStreams.length >= 5) {
                 return NextResponse.json({
                     message: "Rate limit exceeded: You can only add 5 songs per 10 minutes"
                 }, {
@@ -118,6 +118,7 @@ export async function POST(req: NextRequest) {
         const stream = await prismaClient.stream.create({
             data: {
                 userId: data.creatorId,
+                addedBy: user.id,  // Store who added the song
                 url: data.url,
                 extractedId,
                 type: "Youtube",
