@@ -136,3 +136,50 @@ export async function GET(req: NextRequest) {
     })
 }
  
+
+export async function DELETE(req: NextRequest){
+    try{
+        const session = await getServerSession();
+
+        const user = await prismaClient.user.findFirst({
+            where: {
+                email: session?.user?.email ?? ""
+            }
+        });
+
+        if (!user) {
+            return NextResponse.json({
+                message: "Unauthenticated"
+            }, {
+                status: 403
+            })
+        }
+        const data = await req.json();
+
+        const extractedId = data.url.split("?v=")[1];
+        
+        const videoData = await prismaClient.stream.findFirst({
+            where: {
+                extractedId: extractedId
+            }
+        })
+        await prismaClient.stream.delete({
+            where: {
+                id: videoData?.id
+            }
+        });
+        // console.log(videoData);
+        return NextResponse.json({
+            message: "Deleted"
+        }, {
+            status: 200
+        })
+    }
+    catch(e){
+        return NextResponse.json({
+            message: "Error"
+        }, {
+            status: 500
+        })
+    }
+}

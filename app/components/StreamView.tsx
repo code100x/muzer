@@ -144,7 +144,7 @@ export default function StreamView({
   const deleteFromQueue = async (url: string) => {
     // console.log(url)
     setLoading(true);
-    const res = await fetch("/api/streams/delete", {
+    const res = await fetch("/api/streams/", {
         method: "DELETE",
         body: JSON.stringify({
             url
