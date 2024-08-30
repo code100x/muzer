@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Users, Radio, Headphones } from "lucide-react"
 import { Appbar } from "./components/Appbar"
 import useRedirect from "./hooks/useRedirect"
+import { signIn } from "next-auth/react";
 
 export default function LandingPage() {
   useRedirect();
@@ -25,8 +26,8 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="space-x-4">
-              <Button className="bg-purple-600 text-white hover:bg-purple-700">Get Started</Button>
-              <Button variant="outline" className="text-purple-400 border-purple-400 hover:bg-purple-400 hover:text-gray-900">Learn More</Button>
+              <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={() => signIn()}>Get Started</Button>
+              <Button variant="outline" className="text-purple-400 border-purple-400 hover:bg-purple-400 hover:text-gray-900" onClick={() => signIn()}>Learn More</Button>
             </div>
           </div>
         </div>
