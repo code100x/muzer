@@ -117,7 +117,8 @@ export async function POST(req: NextRequest) {
 
         const stream = await prismaClient.stream.create({
             data: {
-                userId: user.id,
+                userId: data.creatorId,
+                addedBy: user.id,
                 url: data.url,
                 extractedId,
                 type: "Youtube",
