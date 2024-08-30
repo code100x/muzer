@@ -4,14 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 //@ts-ignore
-import {
-  ChevronUp,
-  ChevronDown,
-  ThumbsDown,
-  Play,
-  Share2,
-  Axis3DIcon,
-} from "lucide-react";
+import { ChevronUp, ChevronDown, Play, Share2 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "../components/Appbar";
@@ -21,7 +14,6 @@ import { YT_REGEX } from "../lib/utils";
 //@ts-ignore
 import YouTubePlayer from "youtube-player";
 import { useSocket } from "@/context/socket-context";
-import moment from "moment";
 
 interface Video {
   id: string;
@@ -88,6 +80,10 @@ export default function StreamView({
         } else if (type === "song-blocked") {
           enqueueToast("error", `This song will be unblocked for 1 hr.`);
           setLoading(false);
+        } else if (type === "play-next") {
+          if (!playVideo) {
+            await refreshStreams();
+          }
         }
       };
     }
@@ -95,13 +91,6 @@ export default function StreamView({
 
   useEffect(() => {
     refreshStreams();
-    //   const interval = setInterval(() => {
-    //     refreshStreams();
-    //   }, REFRESH_INTERVAL_MS);
-
-    //   return () => {
-    //     clearInterval(interval);
-    //   };
   }, []);
 
   useEffect(() => {
@@ -119,7 +108,9 @@ export default function StreamView({
       console.log(event);
       console.log(event.data);
       if (event.data === 0) {
-        playNext();
+        sendMessage("play-next", {
+          creatorId,
+        });
       }
     }
     player.on("stateChange", eventHandler);
@@ -147,7 +138,6 @@ export default function StreamView({
       credentials: "include",
     });
     const json = await res.json();
-    console.log({ json });
     setQueue(
       json.streams.sort((a: any, b: any) => (a.upvotes < b.upvotes ? 1 : -1))
     );
@@ -172,11 +162,6 @@ export default function StreamView({
   };
 
   function handleVote(id: string, isUpvote: boolean) {
-    console.log({
-      vote: isUpvote ? "upvote" : "downvote",
-      streamId: id,
-      userId: user?.id,
-    });
     sendMessage("cast-vote", {
       vote: isUpvote ? "upvote" : "downvote",
       streamId: id,
@@ -186,20 +171,6 @@ export default function StreamView({
   }
 
   async function castVote(id: string, isUpvote: boolean) {
-    // setQueue((prev) =>
-    //   prev
-    //     .map((video) =>
-    //       video.id === id
-    //         ? {
-    //             ...video,
-    //             upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1,
-    //             haveUpvoted: !video.haveUpvoted,
-    //           }
-    //         : video
-    //     )
-    //     .sort((a, b) => b.upvotes - a.upvotes)
-    // );
-
     fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
       method: "POST",
       body: JSON.stringify({
@@ -208,12 +179,17 @@ export default function StreamView({
     });
   }
 
+  const playNextHandler = async () => {};
+
   const playNext = async () => {
     if (queue.length > 0) {
       try {
         setPlayNextLoader(true);
         const data = await fetch("/api/streams/next", {
           method: "GET",
+        });
+        sendMessage("play-next", {
+          creatorId,
         });
         const json = await data.json();
         setCurrentVideo(json.stream);

@@ -3,7 +3,7 @@ import { RoomManager } from "./StramManager";
 import cluster from "cluster";
 import os from "os";
 
-const cors = os.cpus().length;
+const cors = 2; //os.cpus().length;
 
 if (cluster.isPrimary) {
   for (let i = 0; i < cors; i++) {
@@ -60,10 +60,14 @@ async function main() {
           })
         );
       } else if (type === "add-user") {
-        // data: { userId: string}
-        const rooms = await RoomManager.getInstance().redisClient.get("rooms");
-        console.log(rooms);
         RoomManager.getInstance().addUser(data.userId, ws);
+      } else if (type === "play-next") {
+        await RoomManager.getInstance().publisher.publish(
+          data.creatorId,
+          JSON.stringify({
+            type: "play-next",
+          })
+        );
       }
     });
 

@@ -66,6 +66,8 @@ export class RoomManager {
         data.vote,
         data.votedBy
       );
+    } else if (type === "play-next") {
+      RoomManager.getInstance().publishPlayNext(creatorId);
     }
   }
 
@@ -118,6 +120,18 @@ export class RoomManager {
         spectators: [...room.spectators, userId],
       });
     }
+  }
+
+  publishPlayNext(creatorId: string) {
+    const room = this.rooms.get(creatorId);
+    room?.spectators.forEach((spectator) => {
+      const user = this.users.get(spectator);
+      user?.ws.send(
+        JSON.stringify({
+          type: "play-next",
+        })
+      );
+    });
   }
 
   publishNewVote(
