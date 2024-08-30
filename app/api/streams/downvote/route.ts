@@ -1,5 +1,6 @@
 import { prismaClient } from "@/app/lib/db";
 import { getServerSession } from "next-auth";
+import { ZodError } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -22,12 +23,23 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const data = UpvoteSchema.parse(await req.json()); // data contains both streamId and userId
+        const parsed = UpvoteSchema.safeParse(await req.json()); // data contains both streamId and userId
+
+        if (!parsed.success) {
+            return NextResponse.json({
+                message: "Invalid data",
+                errors: parsed.error.errors
+            }, {
+                status: 403
+            })
+        }
+
+
         await prismaClient.upvote.delete({
             where: {
                 userId_streamId: {
-                    userId: data.userId,
-                    streamId: data.streamId
+                    streamId: `${parsed.data?.streamId}`,
+                    userId: `${parsed.data?.userId}`
                 }
             }
         });
@@ -35,11 +47,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             message: "Done!"
         })
-    } catch(e) {
+    } catch (e) {
         return NextResponse.json({
-            message: "Error while upvoting"
+            message: "Error while upvoting",
+            error: (e instanceof ZodError ? e.errors : (e as Error).message)
         }, {
-            status: 403
+            status: 500 // Internal Server Error code
         })
     }
 
