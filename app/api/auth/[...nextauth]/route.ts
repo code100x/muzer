@@ -2,6 +2,8 @@ import GoogleProvider from "next-auth/providers/google";
 import NextAuth, { type DefaultSession } from "next-auth";
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prismaClient } from "@/app/lib/db";
+//@ts-ignore
+import bcrypt from 'bcrypt';
 
 type Provider = "Google" | "Credentials";
 
@@ -15,7 +17,7 @@ declare module "next-auth" {
     }
 }
 
-// Function to generate a unique username
+// Function to generate unique username
 async function generateUniqueUsername(email: string) {
     const baseUsername = email.split('@')[0];
     let username = baseUsername;
@@ -54,30 +56,30 @@ const handler = NextAuth({
                     });
 
                     if (user) {
-                        // Check password
-                        if (user.password !== credentials.password) {
-                            console.error('Invalid password for user: ', credentials.email);
-                            return null;
-                        }
-                    } else {
-                        // Create new user with a unique username
-                        const username = await generateUniqueUsername(credentials.email);
-                        user = await prismaClient.user.create({
-                            data: {
-                                email: credentials.email,
-                                password: credentials.password,
-                                provider: "Credentials",
-                                username: username // Set the unique username
-                            } 
-                        });
-                        console.log('New user created: ', user.email);
-                    }
+						const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+						if (!isPasswordValid) {
+							console.error('Invalid password for user: ', credentials.email);
+							return null;
+						}
+					} else {
+						const username = await generateUniqueUsername(credentials.email);
+						const hashedPassword = await bcrypt.hash(credentials.password, 10);
+						user = await prismaClient.user.create({
+							data: {
+								email: credentials.email,
+								password: hashedPassword,
+								provider: "Credentials",
+								username: username
+							}
+						});
+						console.log('New user created: ', user.email);
+					}
 
                     return {
                         id: user.id,
                         email: user.email,
                         provider: user.provider as Provider,
-                        username: user.username, // Return the username
+                        username: user.username,
                     };
                 } catch(e) {
                     console.error('Error in authorize function:', e);
@@ -107,7 +109,7 @@ const handler = NextAuth({
                             data: {
                                 email: user.email,
                                 provider: "Google",
-                                username: username // Set the unique username
+                                username: username
                             } 
                         });
                         console.log('New Google user created:', user.email);
