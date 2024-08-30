@@ -19,6 +19,7 @@ model User {
   provider  Provider
   streams   Stream[]  @relation("user")
   upvotes   Upvote[]
+  
 }
 
 model Stream {

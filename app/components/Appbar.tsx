@@ -18,14 +18,7 @@ export function Appbar() {
       <div>
         <div className="flex gap-4 items-center">
           {session.data?.user && <UserProfile session={session.data} />}
-          {session.data?.user && (
-            <Button
-              className="bg-purple-600 text-white hover:bg-purple-700"
-              onClick={() => signOut()}
-            >
-              Logout
-            </Button>
-          )}
+
           {!session.data?.user && (
             <Button
               className="bg-purple-600 text-white hover:bg-purple-700"
