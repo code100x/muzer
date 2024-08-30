@@ -7,7 +7,7 @@ const RemoveStreamSchema = z.object({
     streamId: z.string()
 });
 
-export async function POST(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
     const session = await getServerSession();
     const user = await prismaClient.user.findFirst({
         where: {
@@ -24,10 +24,20 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const data = RemoveStreamSchema.parse(await req.json());
+        const { searchParams } = new URL(req.url)
+        const streamId = searchParams.get('streamId')
+        
+        if (!streamId) {
+            return NextResponse.json({
+                message: "Stream ID is required"
+            }, {
+                status: 400
+            });
+        }
+
         await prismaClient.stream.delete({
             where: {
-                id: data.streamId,
+                id: streamId,
                 userId: user.id
             }
         });

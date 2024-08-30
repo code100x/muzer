@@ -222,12 +222,8 @@ export default function StreamView({
 
     const removeSong = async (streamId: string) => {
         try {
-            const res = await fetch("/api/streams/remove", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ streamId })
+            const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {
+                method: "DELETE",
             })
             if (res.ok) {
                 toast.success("Song removed successfully")
