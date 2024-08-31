@@ -22,6 +22,10 @@
    ```bash
    npx prisma migrate dev init
    ```
+<<<<<<< HEAD
+=======
+   
+>>>>>>> 2d5e86fca0f26522108e0acd7b0147baafe4e522
 6. Start the development server:
    ```bash
    npm run dev
