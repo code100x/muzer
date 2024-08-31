@@ -36,6 +36,8 @@ model Stream {
   upvotes       Upvote[]
   userId        String
   user          User        @relation(fields: [userId], references: [id], name: "user")
+  signature String?
+  paid Boolean @default(false)
   currentStream CurrentStream?
 }
 
