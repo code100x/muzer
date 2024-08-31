@@ -141,7 +141,7 @@ export default function StreamView({
     });
     const parsedResponse = await res.json();
     if (parsedResponse.id) {
-      setQueue(arrageStreams([...queue, await res.json()]));
+      setQueue(arrageStreams([...queue, parsedResponse]));
     } else {
       toast.error(parsedResponse.message ?? "Failed to add to queue", {
         position: "top-right",
@@ -194,7 +194,7 @@ export default function StreamView({
       });
       const parsedResponse = await res.json();
       if (parsedResponse.id) {
-        setQueue(arrageStreams([...queue, await res.json()]));
+        setQueue(arrageStreams([...queue, parsedResponse]));
       } else {
         toast.error(parsedResponse.message ?? "Failed to add to queue", {
           position: "top-right",
