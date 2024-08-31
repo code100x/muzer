@@ -12,6 +12,7 @@ import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 import StreamView from '../components/StreamView'
+import { useSession } from 'next-auth/react'
 
 interface Video {
     "id": string,
@@ -32,13 +33,7 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 const creatorId = "3ce10574-0396-43ac-8274-02882cde607b"
 
 export default async function Component() {
-    try {
-        const data = await fetch("/api/user").then(res => res.json());
-  
-        return <StreamView creatorId={data.user.id} playVideo={true} />
-    } catch(e) {
-        return null
-    }
+    return <StreamView creatorId={creatorId} playVideo={true} />
 }
 
 export const dynamic = 'auto'
