@@ -76,12 +76,12 @@ export default function Component() {
             <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)]">
                 <Appbar />
                 <div className="container mx-auto p-2">
-                    <div className="max-w-sm mx-auto my-24 bg-white pb-10 pt-2 rounded shadow-xl">
-						<div className="mb-10 mx-2 cursor-pointer border py-1 px-3 rounded-lg w-fit hover:border-black transition-all duration-300">
+                    <div className="max-w-sm mx-auto my-24 bg-[#101827] pb-10 pt-2 rounded shadow-xl">
+						<div className="mb-10 mx-2 text-white cursor-pointer border py-1 px-3 rounded-lg w-fit transition-all duration-300">
 							<Link href='/dashboard'>Go Back</Link>
 						</div>
                         <div className="text-center mb-8 px-5">
-                            <h1 className="text-2xl font-bold text-black">
+                            <h1 className="text-2xl font-bold text-white">
                                 Update Profile
                             </h1>
                         </div>
@@ -89,7 +89,7 @@ export default function Component() {
                             {error && <p className="text-red-500">{error}</p>}
                             {success && <p className="text-green-500">{success}</p>}
                             <div className="mt-5">
-                                <label htmlFor="username" className="block text-gray-700">Username</label>
+                                <label htmlFor="username" className="block text-gray-200">Username</label>
                                 <input
                                     type="text"
                                     id="username"
@@ -100,11 +100,11 @@ export default function Component() {
                                 />
                             </div>
                             <div className="mt-5">
-                                <label htmlFor="email" className="block text-gray-700">Email</label>
+                                <label htmlFor="email" className="block text-gray-200">Email</label>
                                 <input
                                     type="email"
                                     id="email"
-                                    className="block w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent cursor-not-allowed"
+                                    className="block w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent cursor-not-allowed"
                                     placeholder="Email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
