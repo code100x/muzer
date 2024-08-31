@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<h1 align='center'>Muzer</h1>
 
-## Getting Started
+## Table of contents
 
-First, run the development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/code100x/muzer.git
+   ```
+2. Navigate to the project directory:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   cd muzer
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Create a `.env` file based on the `.env.example` file and configure the `DATABASE_URL` with your postgreSQL connection string and NEXT_AUTH = by running command in your terminal `openssl rand -base64 32`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. Install dependencies:
+   ```bash
+   npm install
+   ```
+5. Run database migrations:
+   ```bash
+   npx prisma migrate dev init
+   ```
+6. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Contributing
 
-## Learn More
+We welcome contributions from the community! To contribute to CMS, follow these steps:
 
-To learn more about Next.js, take a look at the following resources:
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/fooBar`).
+3. Make your changes and commit them (`git commit -am 'Add some fooBar'`).
+   > Make sure to lint and format your code before commiting
+   >
+   > - `npm run lint:check` to check for lint errors
+   > - `npm run lint:fix` to fix lint errors
+   > - `npm run format:check` to format the code
+   > - `npm run format:fix` to fix the formatting
+4. Push to the branch (`git push origin feature/fooBar`).
+5. Create a new Pull Request.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For major changes, please open an issue first to discuss what you would like to change.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Read our [contribution guidelines](./CONTRIBUTING.md) for more details.
 
-## Deploy on Vercel
+## Contributors
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+<a href="https://github.com/code100x/muzer/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=code100x/muzer&max=400&columns=20" />
+</a>
