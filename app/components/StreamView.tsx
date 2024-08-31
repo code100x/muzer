@@ -32,10 +32,12 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 
 export default function StreamView({
     creatorId,
-    playVideo = false
+    playVideo = false,
+	userId,
 }: {
     creatorId: string;
     playVideo: boolean;
+	userId: string;
 }) {
   const [inputLink, setInputLink] = useState('')
   const [queue, setQueue] = useState<Video[]>([])
@@ -49,7 +51,7 @@ export default function StreamView({
         credentials: "include"
     });
     const json = await res.json();
-    setQueue(json.streams.sort((a: any, b: any) => a.upvotes < b.upvotes ? 1 : -1));
+    setQueue(json?.streams?.sort((a: any, b: any) => a.upvotes < b.upvotes ? 1 : -1));
     
     setCurrentVideo(video => {
         if (video?.id === json.activeStream?.stream?.id) {
@@ -90,19 +92,65 @@ export default function StreamView({
     }
   }, [currentVideo, videoPlayerRef])
 
+  const handleUpVote = (id: string) => {
+    setQueue(queue.map(video => 
+      video.id === id 
+        ? { 
+            ...video, 
+            upvotes: video.upvotes + 1,
+            haveUpvoted: true
+          } 
+        : video
+    ).sort((a, b) => (b.upvotes) - (a.upvotes)))
+
+    fetch(`/api/streams/upvote`, {
+        method: "POST",
+        body: JSON.stringify({
+            streamId: id
+        })
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch("/api/streams/", {
-        method: "POST",
-        body: JSON.stringify({
-            creatorId,
-            url: inputLink
-        })
-    });
-    setQueue([...queue, await res.json()])
-    setLoading(false);
-    setInputLink('')
+	if(queue.find(x => x.url === inputLink && x.userId === userId)) {
+		toast.error('You have already added this video', {
+			position: "top-right",
+			autoClose: 3000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+			progress: undefined,
+		});
+		setQueue([...queue]);
+		setInputLink('');
+		setLoading(false);
+		return;
+	} else if(queue.find(x => x.url === inputLink && x.userId !== userId)) {
+		toast.success('Video already in the queue! Upvoted the video!', {
+			position: "top-right",
+			autoClose: 3000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+			progress: undefined,
+		});
+		handleUpVote(queue?.find(x => x.url === inputLink)?.id || '');
+	} else {
+		const res = await fetch("/api/streams/", {
+			method: "POST",
+			body: JSON.stringify({
+				creatorId,
+				url: inputLink
+			})
+		});
+		setQueue([...queue, await res.json()])
+		setLoading(false);
+		setInputLink('')
+	}
   }
 
   const handleVote = (id: string, isUpvote: boolean) => {
@@ -175,9 +223,9 @@ export default function StreamView({
                 <div className='col-span-3'>
                     <div className="space-y-4">
                         <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
-                        {queue.length === 0 && <Card className="bg-gray-900 border-gray-800 w-full">
+                        {queue?.length === 0 || queue === undefined && <Card className="bg-gray-900 border-gray-800 w-full">
                             <CardContent className="p-4"><p className="text-center py-8 text-gray-400">No videos in queue</p></CardContent></Card>}
-                        {queue.map((video) => (
+                        {queue?.map((video) => (
                             <Card key={video.id} className="bg-gray-900 border-gray-800">
                             <CardContent className="p-4 flex items-center space-x-4">
                                 <img 
