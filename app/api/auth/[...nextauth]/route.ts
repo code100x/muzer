@@ -1,6 +1,6 @@
 import GoogleProvider from "next-auth/providers/google";
 import NextAuth, {type DefaultSession } from "next-auth"
-import { prismaClient } from "@/app/lib/db";
+import  prismaClient  from "@/app/lib/db";
 
 declare module "next-auth" {
     interface Session {

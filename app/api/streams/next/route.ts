@@ -1,4 +1,4 @@
-import { prismaClient } from "@/app/lib/db";
+import  prismaClient  from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -46,7 +46,8 @@ export async function GET() {
             userId: user.id,
             streamId: mostUpvotedStream?.id
         }
-    }), prismaClient.stream.update({
+    }),
+     prismaClient.stream.update({
         where: {
             id: mostUpvotedStream?.id ?? ""
         },
