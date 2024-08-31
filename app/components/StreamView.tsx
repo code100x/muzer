@@ -172,7 +172,7 @@ export default function StreamView({
           toPubkey: new PublicKey(
             "2JVQ3WNE2bwoLYsnyRMQydvkpfPepRedK5h9z5Zy4MEi"
           ),
-          lamports: LAMPORTS_PER_SOL * 0.00173,
+          lamports: LAMPORTS_PER_SOL * 0.0073,
         })
       );
 

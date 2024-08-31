@@ -39,7 +39,6 @@ export async function POST(req: NextRequest) {
       a.width < b.width ? -1 : 1
     );
     // verifying the payment adding without looking at the limit of the user
-    console.log(data.signature);
     const signature = data.signature;
     if (signature && typeof signature === "string") {
       const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -146,7 +145,7 @@ export async function POST(req: NextRequest) {
     console.log(e);
     return NextResponse.json(
       {
-        message: "Error while adding a stream",
+        message: `Error while adding a stream ${JSON.stringify(e)}`,
       },
       {
         status: 411,
