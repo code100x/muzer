@@ -1,6 +1,8 @@
 "use client";
 import StreamView from "@/app/components/StreamView";
+import useRedirect from "@/app/hooks/useRedirect";
 import { useSocket } from "@/context/socket-context";
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 export default function Creator({
@@ -10,7 +12,9 @@ export default function Creator({
     creatorId: string;
   };
 }) {
-  const { user, sendMessage } = useSocket();
+  const { sendMessage, user } = useSocket();
+  const session = useSession();
+  useRedirect();
 
   useEffect(() => {
     if (user) {
@@ -21,8 +25,8 @@ export default function Creator({
     }
   }, [user]);
 
-  if (!user) {
-    return null;
+  if (!session.data) {
+    return <h1>Please Log in....</h1>;
   }
   return <StreamView creatorId={creatorId} playVideo={false} />;
 }

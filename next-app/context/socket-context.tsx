@@ -1,4 +1,5 @@
 import { User } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import {
   PropsWithChildren,
   createContext,
@@ -9,7 +10,7 @@ import {
 
 type SocketContextType = {
   socket: null | WebSocket;
-  user: User | null;
+  user: null | { id: string };
 };
 
 const SocketContext = createContext<SocketContextType>({
@@ -19,7 +20,8 @@ const SocketContext = createContext<SocketContextType>({
 
 export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [user, setUser] = useState<null | User>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const session = useSession();
 
   // useEffect(() => {
   //   if (user) {
@@ -28,24 +30,12 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   // }, [user]);
 
   useEffect(() => {
-    if (!socket) {
+    if (!socket && session.data?.user.id) {
       console.log("Connecting to ws");
       const ws = new WebSocket("ws://localhost:8080");
       ws.onopen = () => {
         setSocket(ws);
-        (async () => {
-          const res = await fetch("/api/user");
-          const data = await res.json();
-          ws.send(
-            JSON.stringify({
-              type: "add-user",
-              data: {
-                userId: data.user.id,
-              },
-            })
-          );
-          setUser(data.user);
-        })();
+        setUser(session.data?.user);
       };
 
       ws.onclose = () => {
@@ -61,7 +51,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
         ws.close();
       };
     }
-  }, []);
+  }, [session.data]);
 
   return (
     <SocketContext.Provider

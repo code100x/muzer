@@ -1,9 +1,10 @@
 import { WebSocket } from "ws";
 import { createClient, RedisClientType } from "redis";
-const TIME_SPAN_FOR_VOTE = 1200000 / 20; // 20min
-const TIME_SPAN_FOR_QUEUE = 1200000 / 20; // 20min
+
+const TIME_SPAN_FOR_VOTE = 1200000; // 20min
+const TIME_SPAN_FOR_QUEUE = 1200000; // 20min
 const TIME_SPAN_FOR_REPEAT = 3600000;
-const QUEUE_LENGTH = 20;
+const MAX_QUEUE_LENGTH = 20;
 
 export class RoomManager {
   private static instance: RoomManager;
@@ -34,10 +35,10 @@ export class RoomManager {
     await this.subscriber.connect();
     await this.publisher.connect();
 
-    await this.subscriber.subscribe("create-room", (message) => {
-      const data = JSON.parse(message);
-      this.createRoom(data.creatorId);
-    });
+    // await this.subscriber.subscribe("create-room", (message) => {
+    //   const data = JSON.parse(message);
+    //   this.createRoom(data.creatorId);
+    // });
 
     const rooms = await this.redisClient.get("rooms");
     if (rooms) {
@@ -47,7 +48,6 @@ export class RoomManager {
 
   onSubscribeRoom(message: string, creatorId: string) {
     const { type, data } = JSON.parse(message);
-    console.log("redis: " + process.pid + " : " + creatorId, type, data);
     if (type === "cast-vote") {
       RoomManager.getInstance().castVote(
         creatorId,
@@ -60,6 +60,10 @@ export class RoomManager {
     } else if (type === "new-stream") {
       RoomManager.getInstance().publishNewStream(creatorId, data.url);
     } else if (type === "new-vote") {
+      console.log(
+        RoomManager.getInstance().rooms.get(creatorId)?.spectators ||
+          `${creatorId}: ${RoomManager.getInstance().users.size}: No spectators`
+      );
       RoomManager.getInstance().publishNewVote(
         creatorId,
         data.streamId,
@@ -71,49 +75,46 @@ export class RoomManager {
     }
   }
 
-  createRoom(creatorId: string) {
-    console.log(process.pid + " :createRoom: " + creatorId);
+  async createRoom(creatorId: string) {
+    console.log(process.pid + ": createRoom: ", { creatorId });
     if (!this.rooms.has(creatorId)) {
       this.rooms.set(creatorId, {
         creatorId,
-        queueLength: 0,
         spectators: [],
       });
-      this.redisClient.get("rooms").then((roomsString) => {
-        if (roomsString) {
-          const rooms = JSON.parse(roomsString);
-          if (!rooms.includes(creatorId)) {
-            this.redisClient.set(
-              "rooms",
-              JSON.stringify([...rooms, creatorId])
-            );
-          }
-        } else {
-          this.redisClient.set("rooms", JSON.stringify([creatorId]));
+      const roomsString = await this.redisClient.get("rooms");
+      if (roomsString) {
+        const rooms = JSON.parse(roomsString);
+        if (!rooms.includes(creatorId)) {
+          await this.redisClient.set(
+            "rooms",
+            JSON.stringify([...rooms, creatorId])
+          );
         }
-        this.subscriber.subscribe(creatorId, this.onSubscribeRoom);
-      });
+      } else {
+        await this.redisClient.set("rooms", JSON.stringify([creatorId]));
+      }
+      await this.subscriber.subscribe(creatorId, this.onSubscribeRoom);
     }
   }
 
   async addUser(userId: string, ws: WebSocket) {
-    const cachedUserData = await this.redisClient.get(userId);
-
+    console.log("addUser", { userId });
     this.users.set(userId, {
       userId,
       ws,
-      ...(cachedUserData
-        ? JSON.parse(cachedUserData)
-        : {
-            lastVoted: new Date().getTime() - TIME_SPAN_FOR_VOTE,
-            lastAdded: new Date().getTime() - TIME_SPAN_FOR_VOTE,
-          }),
     });
   }
 
-  joinRoom(creatorId: string, userId: string) {
-    const room = this.rooms.get(creatorId);
-    const user = this.users.get(userId);
+  async joinRoom(creatorId: string, userId: string) {
+    let room = this.rooms.get(creatorId);
+    let user = this.users.get(userId);
+
+    if (!room) {
+      await this.createRoom(creatorId);
+      room = this.rooms.get(creatorId);
+    }
+
     if (room && user) {
       this.rooms.set(creatorId, {
         ...room,
@@ -123,6 +124,7 @@ export class RoomManager {
   }
 
   publishPlayNext(creatorId: string) {
+    console.log(process.pid + ": publishPlayNext");
     const room = this.rooms.get(creatorId);
     room?.spectators.forEach((spectator) => {
       const user = this.users.get(spectator);
@@ -134,13 +136,35 @@ export class RoomManager {
     });
   }
 
+  async playNextHandler(creatorId: string, socket: WebSocket) {
+    console.log(process.pid + ": playNextHandler");
+    let targetUser: any = null;
+    this.users.forEach((user) => {
+      if (!targetUser && user.ws === socket) {
+        targetUser = user;
+      }
+    });
+    if (targetUser && targetUser.userId === creatorId) {
+      let previousQueueLength: string =
+        (await this.redisClient.get(`queue-length-${creatorId}`)) || "1";
+      if (previousQueueLength) {
+        await this.redisClient.set(
+          `queue-length-${creatorId}`,
+          parseInt(previousQueueLength, 10) - 1
+        );
+      }
+    }
+  }
+
   publishNewVote(
     creatorId: string,
     streamId: string,
     vote: "upvote" | "downvote",
     votedBy: string
   ) {
+    console.log(process.pid + ": publishNewVote");
     const room = this.rooms.get(creatorId);
+    console.log({ publishNewVote: creatorId, users: room?.spectators });
     room?.spectators.forEach((spectator) => {
       const user = this.users.get(spectator);
       user?.ws.send(
@@ -162,6 +186,7 @@ export class RoomManager {
     streamId: string,
     vote: "upvote" | "downvote"
   ) {
+    console.log(process.pid + ": castVote");
     const room = this.rooms.get(creatorId);
     const currentUser = this.users.get(currentUserId);
 
@@ -211,47 +236,65 @@ export class RoomManager {
   }
 
   publishNewStream(creatorId: string, url: string) {
+    console.log(process.pid + ": publishNewStream");
     const room = RoomManager.getInstance().rooms.get(creatorId);
-    RoomManager.getInstance().rooms.forEach((r) => {
-      console.log(room);
-    });
-    console.log(`${process.pid} - ${room || "No rooms found"} - ${url}`);
+
     if (room) {
       room.spectators.forEach((spectatorId) => {
         const spectator = this.users.get(spectatorId);
         spectator?.ws.send(
           JSON.stringify({
-            type: "add-to-queue",
+            type: "new-stream",
             data: {
               url,
             },
           })
         );
       });
-      this.rooms.set(creatorId, {
-        ...room,
-        queueLength: room.queueLength + 1,
-      });
+      // this.rooms.set(creatorId, {
+      //   ...room,
+      //   queueLength: room.queueLength + 1,
+      // });
+    }
+  }
+
+  async addedToQueue(creatorId: string, userId: string, url: string) {
+    const streamUrl = await this.redisClient.get(
+      `new-stream-${userId}-${creatorId}`
+    );
+    console.log("addedToQueue", { creatorId, userId, url, streamUrl });
+    if (streamUrl === url) {
+      await this.publisher.publish(
+        creatorId,
+        JSON.stringify({
+          type: "new-stream",
+          data: {
+            url,
+          },
+        })
+      );
+      await this.redisClient.del("new-stream");
     }
   }
 
   async addToQueue(creatorId: string, currentUserId: string, url: string) {
+    console.log(process.pid + ": addToQueue");
     const room = this.rooms.get(creatorId);
     const currentUser = this.users.get(currentUserId);
 
-    if (!room) {
+    if (!room || !currentUser) {
       return;
     }
     let lastAdded = await this.redisClient.get(`lastAdded-${currentUserId}`);
 
     let alreadyAdded = await this.redisClient.get(url);
 
-    if (
-      currentUser &&
-      !lastAdded &&
-      // currentUser.lastAdded + TIME_SPAN_FOR_QUEUE < lastAdded &&
-      room.queueLength < QUEUE_LENGTH
-    ) {
+    let previousQueueLength: number = parseInt(
+      (await this.redisClient.get(`queue-length-${room.creatorId}`)) || "0",
+      10
+    );
+
+    if (!lastAdded) {
       if (alreadyAdded) {
         currentUser?.ws.send(
           JSON.stringify({
@@ -260,6 +303,20 @@ export class RoomManager {
         );
         return;
       }
+
+      if (previousQueueLength >= MAX_QUEUE_LENGTH) {
+        currentUser?.ws.send(
+          JSON.stringify({
+            type: "max-queue-length",
+          })
+        );
+        return;
+      }
+
+      await this.redisClient.set(
+        `queue-length-${room.creatorId}`,
+        previousQueueLength + 1
+      );
       this.users.set(currentUserId, {
         ...currentUser,
       });
@@ -276,17 +333,21 @@ export class RoomManager {
         }
       );
 
-      this.publisher.publish(
-        room.creatorId,
+      await this.redisClient.set(
+        `new-stream-${currentUser.userId}-${creatorId}`,
+        url
+      );
+
+      currentUser?.ws.send(
         JSON.stringify({
-          type: "new-stream",
+          type: "add-to-stream",
           data: {
             url,
           },
         })
       );
     } else {
-      currentUser?.ws.send(
+      currentUser.ws.send(
         JSON.stringify({
           type: "add-to-queue-not-allowed",
         })
@@ -295,6 +356,7 @@ export class RoomManager {
   }
 
   disconnect(ws: WebSocket) {
+    console.log(process.pid + ": disconnect");
     let user: string | null = null;
     this.users.forEach((usr) => {
       if (!user && usr.ws === ws) {
@@ -323,6 +385,5 @@ type User = {
 
 type Room = {
   creatorId: string;
-  queueLength: number;
   spectators: string[];
 };

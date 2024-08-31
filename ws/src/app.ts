@@ -24,15 +24,15 @@ async function main() {
   wss.on("connection", (ws) => {
     ws.on("message", async (raw) => {
       const { type, data } = JSON.parse(raw.toString()) || {};
-      console.log(process.pid, raw.toString());
       if (type === "create-room") {
         // data: {creatorId: string}
-        await RoomManager.getInstance().publisher.publish(
-          "create-room",
-          JSON.stringify(data)
-        );
+        // await RoomManager.getInstance().publisher.publish(
+        //   "create-room",
+        //   JSON.stringify(data)
+        // );
       } else if (type === "join-room") {
         // data: {creatorId: string, userId: string}
+        RoomManager.getInstance().addUser(data.userId, ws);
         RoomManager.getInstance().joinRoom(data.creatorId, data.userId);
       } else if (type === "cast-vote") {
         // data: {creatorId: string, userId: string, streamId: string}
@@ -49,18 +49,27 @@ async function main() {
         );
       } else if (type === "add-to-queue") {
         // data: {creatorId: string, userId: string, url: string}
-        await RoomManager.getInstance().publisher.publish(
+        await RoomManager.getInstance().addToQueue(
           data.creatorId,
-          JSON.stringify({
-            type: "add-to-queue",
-            data: {
-              userId: data.userId,
-              url: data.url,
-            },
-          })
+          data.userId,
+          data.url
         );
-      } else if (type === "add-user") {
-        RoomManager.getInstance().addUser(data.userId, ws);
+        // await RoomManager.getInstance().publisher.publish(
+        //   data.creatorId,
+        //   JSON.stringify({
+        //     type: "add-to-queue",
+        //     data: {
+        //       userId: data.userId,
+        //       url: data.url,
+        //     },
+        //   })
+        // );
+      } else if (type === "added-to-stream") {
+        await RoomManager.getInstance().addedToQueue(
+          data.creatorId,
+          data.userId,
+          data.url
+        );
       } else if (type === "play-next") {
         await RoomManager.getInstance().publisher.publish(
           data.creatorId,
@@ -68,6 +77,7 @@ async function main() {
             type: "play-next",
           })
         );
+        await RoomManager.getInstance().playNextHandler(data.creatorId, ws);
       }
     });
 

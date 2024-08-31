@@ -14,6 +14,7 @@ import { YT_REGEX } from "../lib/utils";
 //@ts-ignore
 import YouTubePlayer from "youtube-player";
 import { useSocket } from "@/context/socket-context";
+import { useSession } from "next-auth/react";
 
 interface Video {
   id: string;
@@ -43,15 +44,19 @@ export default function StreamView({
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>();
 
-  const { socket, sendMessage, user } = useSocket();
+  const { socket, sendMessage } = useSocket();
+  const user = useSession().data?.user;
 
   useEffect(() => {
     if (socket) {
       socket.onmessage = async (event) => {
         const { type, data } = JSON.parse(event.data) || {};
-        if (type === "add-to-queue") {
+        if (type === "add-to-stream") {
           await addToQueue(data.url);
+        } else if (type === "new-stream") {
+          await refreshStreams();
         } else if (type === "new-vote") {
+          // newVote(data);
           setQueue((prev) => {
             return prev
               .map((v) => {
@@ -120,17 +125,26 @@ export default function StreamView({
   }, [currentVideo, videoPlayerRef]);
 
   async function addToQueue(url: string) {
-    const res = await fetch("/api/streams/", {
-      method: "POST",
-      body: JSON.stringify({
+    try {
+      await fetch("/api/streams/", {
+        method: "POST",
+        body: JSON.stringify({
+          creatorId,
+          url,
+        }),
+      });
+      // const newStream = await res.json();
+      // setQueue((prev) => [...prev, newStream]);
+      // setInputLink("");
+      sendMessage("added-to-stream", {
         creatorId,
+        userId: user?.id,
         url,
-      }),
-    });
-    const newStream = await res.json();
-    setQueue((prev) => [...prev, newStream]);
+      });
+    } catch (error) {
+      enqueueToast("error", "Something went wrong while adding to stream");
+    }
     setLoading(false);
-    setInputLink("");
   }
 
   async function refreshStreams() {
