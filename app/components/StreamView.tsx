@@ -13,6 +13,7 @@ import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 //@ts-ignore
 import YouTubePlayer from 'youtube-player';
+import {SendTokens} from "@/app/components/SendTokens";
 
 interface Video {
     "id": string,
@@ -90,20 +91,35 @@ export default function StreamView({
     }
   }, [currentVideo, videoPlayerRef])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const res = await fetch("/api/streams/", {
-        method: "POST",
-        body: JSON.stringify({
-            creatorId,
-            url: inputLink
-        })
-    });
-    setQueue([...queue, await res.json()])
-    setLoading(false);
-    setInputLink('')
+  const handleSubmit = async () => {
+
+      try {
+          setLoading(true);
+          const res = await fetch("/api/streams/", {
+              method: "POST",
+              body: JSON.stringify({
+                  creatorId,
+                  url: inputLink
+              })
+          });
+          setQueue([...queue, await res.json()])
+          setLoading(false);
+          setInputLink('')
+      } catch (error) {
+          setLoading(false);
+          console.error('Error Adding to Queue: ', error)
+          toast.error('Adding in Queue failed. Please try again.', {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+          })
+      }
   }
+
 
   const handleVote = (id: string, isUpvote: boolean) => {
     setQueue(queue.map(video => 
@@ -213,7 +229,7 @@ export default function StreamView({
                         </Button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-2">
+                        <form className="space-y-2">
                         <Input
                             type="text"
                             placeholder="Paste YouTube link here"
@@ -221,7 +237,8 @@ export default function StreamView({
                             onChange={(e) => setInputLink(e.target.value)}
                             className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
                         />
-                        <Button disabled={loading} onClick={handleSubmit} type="submit" className="w-full bg-purple-700 hover:bg-purple-800 text-white">{loading ? "Loading..." : "Add to Queue"}</Button>
+                        {/*<Button disabled={loading} onClick={handleSubmit} type="submit" className="w-full bg-purple-700 hover:bg-purple-800 text-white">{loading ? "Loading..." : "Add to Queue"}</Button>*/}
+                        <SendTokens handleSubmit={handleSubmit} inputLink={inputLink} loading={loading}/>
                         </form>
 
                         {inputLink && inputLink.match(YT_REGEX) && !loading && (
