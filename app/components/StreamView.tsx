@@ -3,29 +3,26 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-//@ts-ignore
-import { ChevronUp, ChevronDown, ThumbsDown, Play, Share2, Axis3DIcon } from "lucide-react"
+import { ChevronUp, ChevronDown, Play, Share2 } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Appbar } from '../components/Appbar'
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
-import { YT_REGEX } from '../lib/utils'
-//@ts-ignore
 import YouTubePlayer from 'youtube-player';
 
 interface Video {
-    "id": string,
-    "type": string,
-    "url": string,
-    "extractedId": string,
-    "title": string,
-    "smallImg": string,
-    "bigImg": string,
-    "active": boolean,
-    "userId": string,
-    "upvotes": number,
-    "haveUpvoted": boolean
+    id: string,
+    type: string,
+    url: string,
+    extractedId: string,
+    title: string,
+    smallImg: string,
+    bigImg: string,
+    active: boolean,
+    userId: string,
+    upvotes: number,
+    haveUpvoted: boolean
 }
 
 const REFRESH_INTERVAL_MS = 10 * 1000;
@@ -42,7 +39,7 @@ export default function StreamView({
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null)
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
-  const videoPlayerRef = useRef<HTMLDivElement>();
+  const videoPlayerRef = useRef<HTMLDivElement>(null);
 
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
@@ -64,6 +61,7 @@ export default function StreamView({
     const interval = setInterval(() => {
         refreshStreams();
     }, REFRESH_INTERVAL_MS)
+    return () => clearInterval(interval);
   }, [])
 
   useEffect(() => {
@@ -72,14 +70,9 @@ export default function StreamView({
     }
     let player = YouTubePlayer(videoPlayerRef.current);
     
-    // 'loadVideoById' is queued until the player is ready to receive API calls.
     player.loadVideoById(currentVideo?.extractedId);
-    
-    // 'playVideo' is queued until the player is ready to receive API calls and after 'loadVideoById' has been called.
     player.playVideo();
     function eventHandler(event: any) {
-        console.log(event);
-        console.log(event.data);
         if (event.data === 0) {
             playNext();
         }
@@ -149,7 +142,7 @@ export default function StreamView({
             setCurrentVideo(json.stream)
             setQueue(q => q.filter(x => x.id !== json.stream?.id))
         } catch(e) {
-
+            // Handle error
         }
         setPlayNextLoader(false)
     }
@@ -251,26 +244,22 @@ export default function StreamView({
                         </Button>
                         </form>
 
-                        <div className="relative" ref={videoPlayerRef as any}>
+                        <div className="relative" ref={videoPlayerRef}>
                         <LiteYouTubeEmbed 
                             id={currentVideo?.extractedId || ""} 
                             title={currentVideo?.title || "YouTube Video"}
                             adNetwork={false} 
-                            poster="maxresdefault" 
-                            params=""
+                            poster="hqdefault" 
                         />
-                        {currentVideo && <div className="absolute inset-0 flex items-center justify-center">
-                            <Button disabled={playNextLoader} onClick={playNext} className="bg-purple-700 hover:bg-purple-800 text-white">
-                            <Play className="mr-2 h-4 w-4" /> Play Next
-                            </Button>
+                        {playNextLoader && <div className="absolute inset-0 flex items-center justify-center bg-gray-900 opacity-50">
+                            <Play className="w-10 h-10 text-white animate-spin" />
                         </div>}
                         </div>
-
-                        <ToastContainer />
                     </div>
                 </div>
             </div>
         </div>
+        <ToastContainer />
     </div>
   )
 }
