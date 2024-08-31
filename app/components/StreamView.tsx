@@ -139,6 +139,7 @@ export default function StreamView({
 			progress: undefined,
 		});
 		handleUpVote(queue?.find(x => x.url === inputLink)?.id || '');
+		setInputLink('');
 	} else {
 		const res = await fetch("/api/streams/", {
 			method: "POST",
