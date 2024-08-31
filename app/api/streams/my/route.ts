@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
         }
     });
 
+    
     if (!user) {
         return NextResponse.json({
             message: "Unauthenticated"
