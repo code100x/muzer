@@ -1,17 +1,13 @@
-import { prismaClient } from "@/app/lib/db";
+import { authOption } from "@/app/lib/authOptions";
+import  prismaClient  from "@/app/lib/db"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-    const session = await getServerSession();
+    const session = await getServerSession(authOption);
      // TODO: You can get rid of the db call here 
-     const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
 
-    if (!user) {
+    if (!session?.user) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
@@ -22,7 +18,7 @@ export async function GET(req: NextRequest) {
     
     const streams = await prismaClient.stream.findMany({
         where: {
-            userId: user.id
+            userId: session.user.id
         },
         include: {
             _count: {
@@ -32,7 +28,7 @@ export async function GET(req: NextRequest) {
             },
             upvotes: {
                 where: {
-                    userId: user.id
+                    userId: session.user.id
                 }
             }
         }

@@ -1,4 +1,5 @@
-import { prismaClient } from "@/app/lib/db";
+import { authOption } from "@/app/lib/authOptions";
+import  prismaClient  from "@/app/lib/db"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -8,16 +9,11 @@ const UpvoteSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession();
+    const session = await getServerSession(authOption);
 
     // TODO: You can get rid of the db call here 
-    const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
-
-    if (!user) {
+    
+    if (!session?.user) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
@@ -30,7 +26,7 @@ export async function POST(req: NextRequest) {
         await prismaClient.upvote.delete({
             where: {
                 userId_streamId: {
-                    userId: user.id,
+                    userId: session.user.id,
                     streamId: data.streamId
                 }
             }
