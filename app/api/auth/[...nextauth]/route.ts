@@ -124,7 +124,10 @@ const handler = NextAuth({
             return true;
         },
         async session({ session, token }) {
-            if (session.user && token.sub) {
+            if (token && token.sub) {
+                session.user.id = token.sub;
+            }
+            if (session.user && token && token.sub) {
                 session.user.id = token.sub;
                 session.user.provider = (token.provider as Provider) ?? "Credentials";
                 session.user.username = token.username as string;
@@ -135,6 +138,7 @@ const handler = NextAuth({
             if (user) {
                 token.provider = (user as any).provider || account?.provider;
                 token.username = (user as any).username;
+				token.sub = user.id;
             }
             return token;
         }
