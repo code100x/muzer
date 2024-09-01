@@ -56,6 +56,8 @@ export default function StreamView({
     
     setCurrentVideo(video => {
         if (video?.id === json.activeStream?.stream?.id) {
+            console.log(video,"new video");
+            
             return video;
         }
         return json.activeStream.stream
@@ -249,8 +251,8 @@ export default function StreamView({
                                     <div>
                                         {playVideo ? <>
                                         
-                                            <div ref={videoPlayerRef} className='w-full' />
-                                            <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe>
+                                            <div ref={videoPlayerRef}  className='w-full' />
+                                            <iframe width={"100%"}  height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} ></iframe>
                                         </> : <>
                                         <img 
                                             src={currentVideo.bigImg} 

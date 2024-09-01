@@ -142,6 +142,7 @@ export async function GET(req: NextRequest) {
             stream: true
         }
     })])
+    
 
     return NextResponse.json({
         streams: streams.map(({_count, ...rest}) => ({
@@ -150,6 +151,7 @@ export async function GET(req: NextRequest) {
             haveUpvoted: rest.upvotes.length ? true : false
         })),
         activeStream
+
     })
 }
  
