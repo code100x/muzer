@@ -1,14 +1,24 @@
-FROM node:22.6.0
+FROM node:20-alpine
 
 WORKDIR /app
-COPY package.json .
 
-RUN npm install
+# Copy package.json and package-lock.json (if available)
+COPY package*.json ./
 
+# Install dependencies
+RUN npm ci
+
+# Copy prisma schema
+COPY prisma ./prisma/
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy the rest of the application
 COPY . .
 
-RUN DATABASE_URL=$DATABASE_URL npx prisma generate
-RUN DATABASE_URL=$DATABASE_URL npm run build
+# Build the application
+RUN npm run build
 
 EXPOSE 3000
 

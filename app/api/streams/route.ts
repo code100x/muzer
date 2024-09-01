@@ -1,4 +1,4 @@
-import { prismaClient } from "@/app/lib/db";
+import  prisma  from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 //@ts-ignore
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         const thumbnails = res.thumbnail.thumbnails;
         thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
 
-        const existingActiveStream = await prismaClient.stream.count({
+        const existingActiveStream = await prisma.stream.count({
             where: {
                 userId: data.creatorId
             }
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             })
         }
 
-        const stream = await prismaClient.stream.create({
+        const stream = await prisma.stream.create({
             data: {
                 userId: data.creatorId,
                 url: data.url,
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
     const creatorId = req.nextUrl.searchParams.get("creatorId");
     const session = await getServerSession();
      // TODO: You can get rid of the db call here 
-     const user = await prismaClient.user.findFirst({
+     const user = await prisma.user.findFirst({
         where: {
             email: session?.user?.email ?? ""
         }
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
         })
     }
 
-    const [streams, activeStream] = await Promise.all([await prismaClient.stream.findMany({
+    const [streams, activeStream] = await Promise.all([await prisma.stream.findMany({
         where: {
             userId: creatorId,
             played: false
@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
                 }
             }
         }
-    }), prismaClient.currentStream.findFirst({
+    }), prisma.currentStream.findFirst({
         where: {
             userId: creatorId
         },
