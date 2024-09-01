@@ -170,98 +170,106 @@ export default function StreamView({
   return (
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
         <Appbar />
-        <div className='flex justify-center'>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
-                <div className='col-span-3'>
+        <div className='flex justify-center px-5 md:px-10 xl:px-20'>
+            <div className="grid grid-cols-1 gap-y-5 lg:gap-x-5 lg:grid-cols-5 w-screen py-5 lg:py-8">
+                <div className='col-span-3 order-2 lg:order-1'>
                     <div className="space-y-4">
                         <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
-                        {queue.length === 0 && <Card className="bg-gray-900 border-gray-800 w-full">
-                            <CardContent className="p-4"><p className="text-center py-8 text-gray-400">No videos in queue</p></CardContent></Card>}
+                        {queue.length === 0 && 
+                            <Card className="bg-gray-900 border-gray-800 w-full">
+                                <CardContent className="p-4">
+                                    <p className="text-center py-8 text-gray-400">
+                                        No videos in queue
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        }
                         {queue.map((video) => (
                             <Card key={video.id} className="bg-gray-900 border-gray-800">
-                            <CardContent className="p-4 flex items-center space-x-4">
-                                <img 
-                                src={video.smallImg}
-                                alt={`Thumbnail for ${video.title}`}
-                                className="w-30 h-20 object-cover rounded"
-                                />
-                                <div className="flex-grow">
-                                <h3 className="font-semibold text-white">{video.title}</h3>
-                                <div className="flex items-center space-x-2 mt-2">
-                                    <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleVote(video.id, video.haveUpvoted ? false : true)}
-                                    className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                                    >
-                                    {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                                    <span>{video.upvotes}</span>
-                                    </Button>
-                                </div>
-                                </div>
-                            </CardContent>
+                                <CardContent className="p-4 flex flex-col md:flex-row md:space-x-3">
+                                    <img 
+                                        src={video.smallImg}
+                                        alt={`Thumbnail for ${video.title}`}
+                                        className="md:w-40 mb-5 md:mb-0 object-cover rounded-md"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-white">{video.title}</span>
+                                        <div className="flex items-center space-x-2 mt-3">
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm"
+                                                onClick={() => handleVote(video.id, video.haveUpvoted ? false : true)}
+                                                className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                                            >
+                                                {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                                                <span>{video.upvotes}</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
                             </Card>
                         ))}
                     </div>
                 </div>
-                <div className='col-span-2'>
-                    <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
-                        <div className="flex justify-between items-center">
-                        <h1 className="text-xl font-bold text-white">Add a song</h1>
-                        <Button onClick={handleShare} className="bg-purple-700 hover:bg-purple-800 text-white">
-                            <Share2 className="mr-2 h-4 w-4" /> Share
-                        </Button>
+                <div className='col-span-2 order-1 lg:order-2'>
+                    <div className="space-y-4">
+                        <div className="flex justify-between">
+                            <h2 className="text-2xl font-bold text-white">Add a song</h2>
+                            <Button onClick={handleShare} className="bg-purple-700 hover:bg-purple-800 text-white">
+                                <Share2 className="mr-2 h-4 w-4" /> Share
+                            </Button>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-2">
-                        <Input
-                            type="text"
-                            placeholder="Paste YouTube link here"
-                            value={inputLink}
-                            onChange={(e) => setInputLink(e.target.value)}
-                            className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
-                        />
-                        <Button disabled={loading} onClick={handleSubmit} type="submit" className="w-full bg-purple-700 hover:bg-purple-800 text-white">{loading ? "Loading..." : "Add to Queue"}</Button>
+                            <Input
+                                type="text"
+                                placeholder="Paste YouTube link here"
+                                value={inputLink}
+                                onChange={(e) => setInputLink(e.target.value)}
+                                className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
+                            />
+                            <Button disabled={loading} onClick={handleSubmit} type="submit" className="w-full bg-purple-700 hover:bg-purple-800 text-white">{loading ? "Loading..." : "Add to Queue"}</Button>
                         </form>
 
                         {inputLink && inputLink.match(YT_REGEX) && !loading && (
-                        <Card className="bg-gray-900 border-gray-800">
-                            <CardContent className="p-4">
-                                <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
-                            </CardContent>
-                        </Card>
+                            <Card className="bg-gray-900 border-gray-800">
+                                <CardContent className="p-4">
+                                    <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
+                                </CardContent>
+                            </Card>
                         )}
 
                         <div className="space-y-4">
-                        <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-                        <Card className="bg-gray-900 border-gray-800">
-                            <CardContent className="p-4">
-                                {currentVideo ? (
-                                    <div>
-                                        {playVideo ? <>
-                                        {/* @ts-ignore */}
-                                            <div ref={videoPlayerRef} className='w-full' />
-                                            {/* <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe> */}
-                                        </> : <>
-                                        <img 
-                                            src={currentVideo.bigImg} 
-                                            className="w-full h-72 object-cover rounded"
-                                        />
-                                        <p className="mt-2 text-center font-semibold text-white">{currentVideo.title}</p>
-                                    </>}
-                                </div>) : (
-                                    <p className="text-center py-8 text-gray-400">No video playing</p>
-                                )}
-                            </CardContent>
-                        </Card>
-                        {playVideo && <Button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
-                            <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
-                        </Button>}
+                            <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+                            <Card className="bg-gray-900 border-gray-800">
+                                <CardContent className="p-4">
+                                    {currentVideo ? (
+                                        <div>
+                                            {playVideo ? <>
+                                            {/* @ts-ignore */}
+                                                <div ref={videoPlayerRef} className='w-full' />
+                                                {/* <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe> */}
+                                            </> : <>
+                                            <img 
+                                                src={currentVideo.bigImg} 
+                                                className="w-full h-72 object-cover rounded"
+                                            />
+                                            <p className="mt-2 text-center font-semibold text-white">{currentVideo.title}</p>
+                                        </>}
+                                    </div>) : (
+                                        <p className="text-center py-8 text-gray-400">No video playing</p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                            {playVideo && <Button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
+                                <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
+                            </Button>}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
         <ToastContainer 
             position="top-right"
             autoClose={3000}
