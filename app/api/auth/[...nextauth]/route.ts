@@ -26,15 +26,12 @@ const handler = NextAuth({
         const emailValidation = emailSchema.safeParse(credentials.email);
 
         if (!emailValidation.success) {
-          console.log("email is wrong");
-
           throw new Error("Invalid email");
         }
 
         const passwordValidation = passwordSchema.safeParse(credentials.password);
 
         if (!passwordValidation.success) {
-          console.log("password is wrong");
           throw new Error("password in wrong format");
         }
 

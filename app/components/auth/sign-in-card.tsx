@@ -51,6 +51,10 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
           if (res?.error) {
             setError(res.error);
           }
+
+          if (!res?.error) {
+            router.push("/dashboard");
+          }
           console.log(res);
           setPending(false);
         });
@@ -62,6 +66,7 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
 
   const handlerCredentialSignin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setError("");
     setPending(true);
     signInWithProvider("credentials");
@@ -95,7 +100,7 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="focus:ring-purple-600 bg-transparent placeholder:text-gray-400 border-gray-400 text-white"
+            className="focus-visible:ring-offset-0 focus-visible:ring-purple-600 bg-transparent placeholder:text-gray-400 border-gray-400 text-white"
             type="email"
             required
           />
@@ -104,7 +109,7 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="focus:ring-purple-600 bg-transparent placeholder:text-gray-400 border-gray-400 text-white"
+            className="focus-visible:ring-offset-0 focus-visible:ring-purple-600 bg-transparent placeholder:text-gray-400 border-gray-400 text-white"
             type="password"
             required
           />

@@ -23,7 +23,7 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 
 const creatorId = "3ce10574-0396-43ac-8274-02882cde607b";
 
-export default async function Component() {
+export default function Component() {
   const session = useSession();
   const router = useRouter();
   try {
