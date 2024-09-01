@@ -24,46 +24,28 @@ async function main() {
   wss.on("connection", (ws) => {
     ws.on("message", async (raw) => {
       const { type, data } = JSON.parse(raw.toString()) || {};
-      if (type === "create-room") {
-        // data: {creatorId: string}
-        // await RoomManager.getInstance().publisher.publish(
-        //   "create-room",
-        //   JSON.stringify(data)
-        // );
-      } else if (type === "join-room") {
-        // data: {creatorId: string, userId: string}
-        RoomManager.getInstance().addUser(data.userId, ws);
-        RoomManager.getInstance().joinRoom(data.creatorId, data.userId);
+      if (type === "join-room") {
+        RoomManager.getInstance().joinRoom(data.creatorId, data.userId, ws);
       } else if (type === "cast-vote") {
-        // data: {creatorId: string, userId: string, streamId: string}
-        await RoomManager.getInstance().publisher.publish(
+        await RoomManager.getInstance().castVote(
           data.creatorId,
-          JSON.stringify({
-            type: "cast-vote",
-            data: {
-              userId: data.userId,
-              streamId: data.streamId,
-              vote: data.vote,
-            },
-          })
+          data.userId,
+          data.streamId,
+          data.vote
+        );
+      } else if (type === "casted-vote") {
+        await RoomManager.getInstance().castedVote(
+          data.creatorId,
+          data.userId,
+          data.streamId,
+          data.vote
         );
       } else if (type === "add-to-queue") {
-        // data: {creatorId: string, userId: string, url: string}
         await RoomManager.getInstance().addToQueue(
           data.creatorId,
           data.userId,
           data.url
         );
-        // await RoomManager.getInstance().publisher.publish(
-        //   data.creatorId,
-        //   JSON.stringify({
-        //     type: "add-to-queue",
-        //     data: {
-        //       userId: data.userId,
-        //       url: data.url,
-        //     },
-        //   })
-        // );
       } else if (type === "added-to-stream") {
         await RoomManager.getInstance().addedToQueue(
           data.creatorId,

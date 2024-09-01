@@ -43,7 +43,6 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
       };
 
       ws.onerror = () => {
-        console.log("Something went wrong");
         setSocket(null);
       };
 
@@ -51,7 +50,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
         ws.close();
       };
     }
-  }, [session.data]);
+  }, [socket, session.data]);
 
   return (
     <SocketContext.Provider

@@ -185,15 +185,23 @@ export default function StreamView({
   }
 
   async function castVote(id: string, isUpvote: boolean) {
-    fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
-      method: "POST",
-      body: JSON.stringify({
+    try {
+      await fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
+        method: "POST",
+        body: JSON.stringify({
+          streamId: id,
+        }),
+      });
+      sendMessage("casted-vote", {
+        vote: isUpvote ? "upvote" : "downvote",
         streamId: id,
-      }),
-    });
+        userId: user?.id,
+        creatorId,
+      });
+    } catch (error) {
+      enqueueToast("error", "Error while voting");
+    }
   }
-
-  const playNextHandler = async () => {};
 
   const playNext = async () => {
     if (queue.length > 0) {
