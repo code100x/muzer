@@ -5,7 +5,7 @@ import { z } from "zod";
 import youtubesearchapi from "youtube-search-api";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
-
+import { toast } from "react-toastify";
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
     url: z.string()
@@ -15,13 +15,31 @@ const MAX_QUEUE_LEN = 20;
 
 export async function POST(req: NextRequest) {
     try {
+        
         const data = CreateStreamSchema.parse(await req.json());
 
-        console.log(data,"data here");
         
         const isYt = data.url.match(YT_REGEX)
 
-        console.log(isYt,"yt response");
+
+        const exists=await prisma.stream.findFirst({
+            where:{
+                url:data.url
+            }
+        })
+
+     
+        
+
+        if(exists){
+           
+
+        
+            
+            return NextResponse.json({
+                message:"This video already exists"
+            })
+        }
         
         if (!isYt) {
             return NextResponse.json({
@@ -34,15 +52,12 @@ export async function POST(req: NextRequest) {
         
         const extractedId = isYt? isYt[1]:null
         
-        console.log(extractedId,"id here");
         
 
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
-        console.log(res,"res here");
-        
+         
 
         const thumbnails = res.thumbnail.thumbnails;
-        console.log(thumbnails,"thumbnail here");
         
         thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
 
@@ -60,6 +75,8 @@ export async function POST(req: NextRequest) {
             })
         }
 
+      
+
         const stream = await prisma.stream.create({
             data: {
                 userId: data.creatorId,
@@ -72,7 +89,8 @@ export async function POST(req: NextRequest) {
                 bigImg: thumbnails[thumbnails.length - 1].url ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg"
             }
         });
-        console.log(stream,"stram here");
+
+       
         
 
         return NextResponse.json({

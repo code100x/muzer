@@ -44,8 +44,7 @@ export default function StreamView({
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
 
-  console.log(currentVideo,"currentvideo here");
-  
+   
 
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
@@ -56,7 +55,6 @@ export default function StreamView({
     
     setCurrentVideo(video => {
         if (video?.id === json.activeStream?.stream?.id) {
-            console.log(video,"new video");
             
             return video;
         }
