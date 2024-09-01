@@ -1,11 +1,11 @@
-import { prismaClient } from "@/app/lib/db";
+import prisma  from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
     const session = await getServerSession();
     // TODO: You can get rid of the db call here 
-    const user = await prismaClient.user.findFirst({
+    const user = await prisma.user.findFirst({
         where: {
             email: session?.user?.email ?? ""
         }

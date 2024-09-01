@@ -32,7 +32,7 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 
 export default function StreamView({
     creatorId,
-    playVideo = false
+    playVideo = true
 }: {
     creatorId: string;
     playVideo: boolean;
@@ -42,7 +42,10 @@ export default function StreamView({
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null)
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
-  const videoPlayerRef = useRef<HTMLDivElement>();
+  const videoPlayerRef = useRef<HTMLDivElement>(null);
+
+  console.log(currentVideo,"currentvideo here");
+  
 
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
@@ -93,12 +96,18 @@ export default function StreamView({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const body=JSON.stringify({
+        creatorId,
+        url:inputLink
+    })
     const res = await fetch("/api/streams/", {
         method: "POST",
-        body: JSON.stringify({
-            creatorId,
-            url: inputLink
-        })
+       
+        
+       
+        
+        body:body,
+       
     });
     setQueue([...queue, await res.json()])
     setLoading(false);
@@ -239,9 +248,9 @@ export default function StreamView({
                                 {currentVideo ? (
                                     <div>
                                         {playVideo ? <>
-                                        {/* @ts-ignore */}
+                                        
                                             <div ref={videoPlayerRef} className='w-full' />
-                                            {/* <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe> */}
+                                            <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe>
                                         </> : <>
                                         <img 
                                             src={currentVideo.bigImg} 

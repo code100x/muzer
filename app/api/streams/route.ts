@@ -16,7 +16,13 @@ const MAX_QUEUE_LEN = 20;
 export async function POST(req: NextRequest) {
     try {
         const data = CreateStreamSchema.parse(await req.json());
+
+        console.log(data,"data here");
+        
         const isYt = data.url.match(YT_REGEX)
+
+        console.log(isYt,"yt response");
+        
         if (!isYt) {
             return NextResponse.json({
                 message: "Wrong URL format"
@@ -25,11 +31,19 @@ export async function POST(req: NextRequest) {
             })    
         }
 
-        const extractedId = data.url.split("?v=")[1];
+        
+        const extractedId = isYt? isYt[1]:null
+        
+        console.log(extractedId,"id here");
+        
 
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
+        console.log(res,"res here");
+        
 
         const thumbnails = res.thumbnail.thumbnails;
+        console.log(thumbnails,"thumbnail here");
+        
         thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
 
         const existingActiveStream = await prisma.stream.count({
@@ -50,6 +64,7 @@ export async function POST(req: NextRequest) {
             data: {
                 userId: data.creatorId,
                 url: data.url,
+                // @ts-ignore
                 extractedId,
                 type: "Youtube",
                 title: res.title ?? "Cant find video",
@@ -57,6 +72,8 @@ export async function POST(req: NextRequest) {
                 bigImg: thumbnails[thumbnails.length - 1].url ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg"
             }
         });
+        console.log(stream,"stram here");
+        
 
         return NextResponse.json({
             ...stream,

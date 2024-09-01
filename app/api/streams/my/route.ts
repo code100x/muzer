@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
             userId: user.id
         },
         include: {
+           
             _count: {
                 select: {
                     upvotes: true
