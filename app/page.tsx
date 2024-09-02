@@ -25,8 +25,8 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="space-x-4">
-              <Button className="bg-purple-600 text-white hover:bg-purple-700">Get Started</Button>
-              <Button variant="outline" className="text-purple-400 border-purple-400 hover:bg-purple-400 hover:text-gray-900">Learn More</Button>
+              <Button className="bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 transition-all duration-300">Get Started</Button>
+              <Button variant="outline" className="text-purple-400 border-purple-400 hover:bg-purple-500 hover:text-white hover:scale-105 transition-all duration-300">Learn More</Button>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function LandingPage() {
                   placeholder="Enter your email" 
                   type="email" 
                 />
-                <Button type="submit" className="bg-purple-600 text-white hover:bg-purple-700">Sign Up</Button>
+                <Button type="submit" className="bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 transition-all duration-300">Sign Up</Button>
               </form>
             </div>
           </div>
