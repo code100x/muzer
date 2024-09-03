@@ -113,7 +113,6 @@ export async function GET(req: NextRequest) {
   const creatorId = req.nextUrl.searchParams.get("creatorId");
   const session = await getServerSession();
   // TODO: You can get rid of the db call here
-  console.log(session?.user);
   const user = await prismaClient.user.findFirst({
     where: {
       email: session?.user?.email ?? "",
