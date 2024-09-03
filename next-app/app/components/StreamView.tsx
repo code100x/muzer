@@ -15,7 +15,6 @@ import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
 import { useSocket } from "@/context/socket-context";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 
 interface Video {
   id: string;
@@ -101,9 +100,7 @@ export default function StreamView({
       console.log(event);
       console.log(event.data);
       if (event.data === 0) {
-        sendMessage("play-next", {
-          creatorId,
-        });
+        playNext();
       }
     }
     player.on("stateChange", eventHandler);
@@ -141,13 +138,17 @@ export default function StreamView({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    sendMessage("add-to-queue", {
-      creatorId,
-      userId: user?.id,
-      url: inputLink,
-    });
-
-    setLoading(true);
+    if (inputLink.match(YT_REGEX)) {
+      setLoading(true);
+      sendMessage("add-to-queue", {
+        creatorId,
+        userId: user?.id,
+        url: inputLink,
+      });
+    } else {
+      enqueueToast("error", "Invalid please use specified formate");
+    }
+    setInputLink("");
   };
 
   function handleVote(id: string, isUpvote: boolean) {
@@ -159,24 +160,24 @@ export default function StreamView({
     });
   }
 
-  async function castVote(id: string, isUpvote: boolean) {
-    try {
-      await fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
-        method: "POST",
-        body: JSON.stringify({
-          streamId: id,
-        }),
-      });
-      sendMessage("casted-vote", {
-        vote: isUpvote ? "upvote" : "downvote",
-        streamId: id,
-        userId: user?.id,
-        creatorId,
-      });
-    } catch (error) {
-      enqueueToast("error", "Error while voting");
-    }
-  }
+  // async function castVote(id: string, isUpvote: boolean) {
+  //   try {
+  //     await fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         streamId: id,
+  //       }),
+  //     });
+  //     sendMessage("casted-vote", {
+  //       vote: isUpvote ? "upvote" : "downvote",
+  //       streamId: id,
+  //       userId: user?.id,
+  //       creatorId,
+  //     });
+  //   } catch (error) {
+  //     enqueueToast("error", "Error while voting");
+  //   }
+  // }
 
   const playNext = async () => {
     sendMessage("play-next", {
@@ -230,9 +231,7 @@ export default function StreamView({
               {queue.map((video) => (
                 <Card key={video.id} className="bg-gray-900 border-gray-800">
                   <CardContent className="p-4 flex items-center space-x-4">
-                    <Image
-                      width={500}
-                      height={500}
+                    <img
                       src={video.smallImg}
                       alt={`Thumbnail for ${video.title}`}
                       className="w-30 h-20 object-cover rounded"
@@ -282,7 +281,7 @@ export default function StreamView({
               <form onSubmit={handleSubmit} className="space-y-2">
                 <Input
                   type="text"
-                  placeholder="Paste YouTube link here"
+                  placeholder="Please paster you link"
                   value={inputLink}
                   onChange={(e) => setInputLink(e.target.value)}
                   className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
@@ -315,13 +314,10 @@ export default function StreamView({
                           <>
                             {/* @ts-ignore */}
                             <div ref={videoPlayerRef} className="w-full" />
-                            {/* <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe> */}
                           </>
                         ) : (
                           <>
-                            <Image
-                              width={500}
-                              height={500}
+                            <img
                               alt={currentVideo.bigImg}
                               src={currentVideo.bigImg}
                               className="w-full h-72 object-cover rounded"

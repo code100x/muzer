@@ -130,7 +130,7 @@ export class RoomManager {
     if (room && user) {
       this.rooms.set(creatorId, {
         ...room,
-        spectators: [...room.spectators, userId],
+        spectators: [...new Set([...room.spectators, userId])],
       });
     }
   }
@@ -138,7 +138,6 @@ export class RoomManager {
   publishPlayNext(creatorId: string) {
     console.log("publishPlayNext");
     const room = this.rooms.get(creatorId);
-    console.log({ room });
     room?.spectators.forEach((spectator) => {
       const user = this.users.get(spectator);
       user?.ws.send(
