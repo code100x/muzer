@@ -4,6 +4,7 @@ import useRedirect from "@/app/hooks/useRedirect";
 import { useSocket } from "@/context/socket-context";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import jwt from "jsonwebtoken";
 
 export default function Creator({
   params: { creatorId },
@@ -12,16 +13,28 @@ export default function Creator({
     creatorId: string;
   };
 }) {
-  const { sendMessage, user } = useSocket();
+  const { socket, user } = useSocket();
   const session = useSession();
   useRedirect();
 
   useEffect(() => {
     if (user) {
-      sendMessage("join-room", {
-        creatorId,
-        userId: user.id,
-      });
+      const token = jwt.sign(
+        {
+          creatorId: creatorId,
+          userId: user.id,
+        },
+        process.env.NEXT_PUBLIC_SECRET ?? "secret"
+      );
+
+      socket?.send(
+        JSON.stringify({
+          type: "join-room",
+          data: {
+            token,
+          },
+        })
+      );
     }
   }, [user]);
 

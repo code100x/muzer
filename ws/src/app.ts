@@ -1,9 +1,14 @@
 import { WebSocketServer } from "ws";
-import { RoomManager } from "./StramManager";
 import cluster from "cluster";
-import os from "os";
+import http from "http";
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+// import os from "os";
 
-const cors = 2; //os.cpus().length;
+import { RoomManager } from "./StramManager";
+
+dotenv.config();
+const cors = 1; // os.cpus().length  // for vertical scaling
 
 if (cluster.isPrimary) {
   for (let i = 0; i < cors; i++) {
@@ -18,23 +23,46 @@ if (cluster.isPrimary) {
 }
 
 async function main() {
-  const wss = new WebSocketServer({ port: 8080 });
+  const server = http.createServer((req, res) => {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/plain");
+
+    const data = "Hello, this is some data from the server!";
+    res.write(data);
+    res.end();
+  });
+  const wss = new WebSocketServer({ server });
   await RoomManager.getInstance().initRedisClient();
 
   wss.on("connection", (ws) => {
     ws.on("message", async (raw) => {
       const { type, data } = JSON.parse(raw.toString()) || {};
       if (type === "join-room") {
-        RoomManager.getInstance().joinRoom(data.creatorId, data.userId, ws);
+        jwt.verify(
+          data.token,
+          process.env.NEXTAUTH_SECRET as string,
+          (err: any, decoded: any) => {
+            console.log(err);
+            if (err) {
+              ws.send(
+                JSON.stringify({
+                  type: "error",
+                  data: {
+                    message: "Token verification failed",
+                  },
+                })
+              );
+            } else {
+              RoomManager.getInstance().joinRoom(
+                decoded.creatorId,
+                decoded.userId,
+                ws
+              );
+            }
+          }
+        );
       } else if (type === "cast-vote") {
         await RoomManager.getInstance().castVote(
-          data.creatorId,
-          data.userId,
-          data.streamId,
-          data.vote
-        );
-      } else if (type === "casted-vote") {
-        await RoomManager.getInstance().castedVote(
           data.creatorId,
           data.userId,
           data.streamId,
@@ -46,20 +74,17 @@ async function main() {
           data.userId,
           data.url
         );
-      } else if (type === "added-to-stream") {
-        await RoomManager.getInstance().addedToQueue(
-          data.creatorId,
-          data.userId,
-          data.url
-        );
       } else if (type === "play-next") {
         await RoomManager.getInstance().publisher.publish(
-          data.creatorId,
+          process.pid.toString(),
           JSON.stringify({
             type: "play-next",
+            data: {
+              creatorId: data.creatorId,
+              userId: data.userId,
+            },
           })
         );
-        await RoomManager.getInstance().playNextHandler(data.creatorId, ws);
       }
     });
 
@@ -68,5 +93,8 @@ async function main() {
     });
   });
 
-  console.log(`${process.pid}: ` + "WebSocket server is running on 8080");
+  const PORT = process.env.PORT;
+  server.listen(PORT, () => {
+    console.log(`${process.pid}: ` + "WebSocket server is running on " + PORT);
+  });
 }

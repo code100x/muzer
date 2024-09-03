@@ -5,16 +5,24 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/app.ts",
-    "start": "tsc -b && node dist/app.js"
+    "start": "prisma generate && tsc -b && node dist/app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^8.5.1",
+    "prisma": "^5.19.1",
     "redis": "^4.7.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/ws": "^8.5.12",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2"

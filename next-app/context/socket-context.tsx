@@ -23,12 +23,6 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<{ id: string } | null>(null);
   const session = useSession();
 
-  // useEffect(() => {
-  //   if (user) {
-  //     socket?.
-  //   }
-  // }, [user]);
-
   useEffect(() => {
     if (!socket && session.data?.user.id) {
       console.log("Connecting to ws");

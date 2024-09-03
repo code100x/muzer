@@ -15,6 +15,7 @@ import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
 import { useSocket } from "@/context/socket-context";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 interface Video {
   id: string;
@@ -51,12 +52,9 @@ export default function StreamView({
     if (socket) {
       socket.onmessage = async (event) => {
         const { type, data } = JSON.parse(event.data) || {};
-        if (type === "add-to-stream") {
-          await addToQueue(data.url);
-        } else if (type === "new-stream") {
-          await refreshStreams();
+        if (type === "new-stream") {
+          addToQueue(data);
         } else if (type === "new-vote") {
-          // newVote(data);
           setQueue((prev) => {
             return prev
               .map((v) => {
@@ -74,21 +72,11 @@ export default function StreamView({
               })
               .sort((a, b) => b.upvotes - a.upvotes);
           });
-        } else if (type === "cast-vote") {
-          await castVote(data.streamId, data.vote === "upvote");
-        } else if (type === "add-to-queue-not-allowed") {
-          enqueueToast("error", `You can add again after 20 minutes`);
-          setLoading(false);
-        } else if (type === "vote-not-allowed") {
-          enqueueToast("error", `You can vote again after 20 min`);
-          setLoading(false);
-        } else if (type === "song-blocked") {
-          enqueueToast("error", `This song will be unblocked for 1 hr.`);
+        } else if (type === "error") {
+          enqueueToast("error", data.message);
           setLoading(false);
         } else if (type === "play-next") {
-          if (!playVideo) {
-            await refreshStreams();
-          }
+          await refreshStreams();
         }
       };
     }
@@ -124,44 +112,31 @@ export default function StreamView({
     };
   }, [currentVideo, videoPlayerRef]);
 
-  async function addToQueue(url: string) {
-    try {
-      await fetch("/api/streams/", {
-        method: "POST",
-        body: JSON.stringify({
-          creatorId,
-          url,
-        }),
-      });
-      // const newStream = await res.json();
-      // setQueue((prev) => [...prev, newStream]);
-      // setInputLink("");
-      sendMessage("added-to-stream", {
-        creatorId,
-        userId: user?.id,
-        url,
-      });
-    } catch (error) {
-      enqueueToast("error", "Something went wrong while adding to stream");
-    }
+  async function addToQueue(newStream: any) {
+    setQueue((prev) => [...prev, newStream]);
+    setInputLink("");
     setLoading(false);
   }
 
   async function refreshStreams() {
-    const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
-      credentials: "include",
-    });
-    const json = await res.json();
-    setQueue(
-      json.streams.sort((a: any, b: any) => (a.upvotes < b.upvotes ? 1 : -1))
-    );
+    try {
+      const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
+        credentials: "include",
+      });
+      const json = await res.json();
+      setQueue(
+        json.streams.sort((a: any, b: any) => (a.upvotes < b.upvotes ? 1 : -1))
+      );
 
-    setCurrentVideo((video) => {
-      if (video?.id === json.activeStream?.stream?.id) {
-        return video;
-      }
-      return json.activeStream.stream;
-    });
+      setCurrentVideo((video) => {
+        if (video?.id === json.activeStream?.stream?.id) {
+          return video;
+        }
+        return json.activeStream.stream;
+      });
+    } catch (error) {
+      enqueueToast("error", "Something went wrong");
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -204,21 +179,10 @@ export default function StreamView({
   }
 
   const playNext = async () => {
-    if (queue.length > 0) {
-      try {
-        setPlayNextLoader(true);
-        const data = await fetch("/api/streams/next", {
-          method: "GET",
-        });
-        sendMessage("play-next", {
-          creatorId,
-        });
-        const json = await data.json();
-        setCurrentVideo(json.stream);
-        setQueue((q) => q.filter((x) => x.id !== json.stream?.id));
-      } catch (e) {}
-      setPlayNextLoader(false);
-    }
+    sendMessage("play-next", {
+      creatorId,
+      userId: user?.id,
+    });
   };
 
   const enqueueToast = (type: "error" | "success", message: string) => {
@@ -266,7 +230,9 @@ export default function StreamView({
               {queue.map((video) => (
                 <Card key={video.id} className="bg-gray-900 border-gray-800">
                   <CardContent className="p-4 flex items-center space-x-4">
-                    <img
+                    <Image
+                      width={500}
+                      height={500}
                       src={video.smallImg}
                       alt={`Thumbnail for ${video.title}`}
                       className="w-30 h-20 object-cover rounded"
@@ -353,7 +319,10 @@ export default function StreamView({
                           </>
                         ) : (
                           <>
-                            <img
+                            <Image
+                              width={500}
+                              height={500}
+                              alt={currentVideo.bigImg}
                               src={currentVideo.bigImg}
                               className="w-full h-72 object-cover rounded"
                             />
