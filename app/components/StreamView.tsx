@@ -13,7 +13,7 @@ import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 //@ts-ignore
 import YouTubePlayer from 'youtube-player';
-
+import { ShareModal } from '../components/ShareModal';
 interface Video {
     "id": string,
     "type": string,
@@ -43,7 +43,15 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleShare = () => {
+      setIsModalOpen(true);
+  }
+
+  const closeModal = () => {
+      setIsModalOpen(false);
+  }
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
         credentials: "include"
@@ -141,31 +149,31 @@ export default function StreamView({
     }
   }
 
-  const handleShare = () => {
-    const shareableLink = `${window.location.hostname}/creator/${creatorId}`
-    navigator.clipboard.writeText(shareableLink).then(() => {
-      toast.success('Link copied to clipboard!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      })
-    }, (err) => {
-      console.error('Could not copy text: ', err)
-      toast.error('Failed to copy link. Please try again.', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      })
-    })
-  }
+//   const handleShare = () => {
+//     const shareableLink = `${window.location.hostname}/creator/${creatorId}`
+//     navigator.clipboard.writeText(shareableLink).then(() => {
+//       toast.success('Link copied to clipboard!', {
+//         position: "top-right",
+//         autoClose: 3000,
+//         hideProgressBar: false,
+//         closeOnClick: true,
+//         pauseOnHover: true,
+//         draggable: true,
+//         progress: undefined,
+//       })
+//     }, (err) => {
+//       console.error('Could not copy text: ', err)
+//       toast.error('Failed to copy link. Please try again.', {
+//         position: "top-right",
+//         autoClose: 3000,
+//         hideProgressBar: false,
+//         closeOnClick: true,
+//         pauseOnHover: true,
+//         draggable: true,
+//         progress: undefined,
+//       })
+//     })
+//   }
 
   return (
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
@@ -274,6 +282,11 @@ export default function StreamView({
             pauseOnHover
             theme="dark"
         />
+          <ShareModal 
+                isOpen={isModalOpen} 
+                onClose={closeModal} 
+                shareableLink={`${window.location.hostname}/creator/${creatorId}`} 
+            />
     </div>
   )
 }
