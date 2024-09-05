@@ -18,7 +18,8 @@
     "jsonwebtoken": "^8.5.1",
     "prisma": "^5.19.1",
     "redis": "^4.7.0",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "youtube-search-api": "^1.2.2"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",

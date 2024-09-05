@@ -1,11 +1,12 @@
 import { WebSocket } from "ws";
 import { createClient, RedisClientType } from "redis";
 import { PrismaClient } from "@prisma/client";
-import axios from "axios";
+//@ts-ignore
+import youtubesearchapi from "youtube-search-api";
 
-const TIME_SPAN_FOR_VOTE = 1200000 / 20; // 20min
-const TIME_SPAN_FOR_QUEUE = 1200000 / 20; // 20min
-const TIME_SPAN_FOR_REPEAT = 3600000 / 60;
+const TIME_SPAN_FOR_VOTE = 1200000; // 20min
+const TIME_SPAN_FOR_QUEUE = 1200000; // 20min
+const TIME_SPAN_FOR_REPEAT = 3600000;
 const MAX_QUEUE_LENGTH = 20;
 
 const redisCredentials = {
@@ -381,18 +382,14 @@ export class RoomManager {
       existingActiveStream + 1
     );
 
-    const {
-      data: { items },
-    } = await axios.get("https://www.googleapis.com/youtube/v3/videos", {
-      params: {
-        key: process.env.GOOGLE_API_KEY,
-        id: extractedId,
-        part: "snippet",
-      },
-    });
+    const res = await youtubesearchapi.GetVideoDetails(extractedId);
 
-    const video = items?.[0]?.snippet;
-    if (video) {
+    // const video = items?.[0]?.snippet;
+    if (res.thumbnail) {
+      const thumbnails = res.thumbnail.thumbnails;
+      thumbnails.sort((a: { width: number }, b: { width: number }) =>
+        a.width < b.width ? -1 : 1
+      );
       const stream = await this.prisma.stream.create({
         data: {
           id: crypto.randomUUID(),
@@ -400,9 +397,17 @@ export class RoomManager {
           url: url,
           extractedId,
           type: "Youtube",
-          title: video.title ?? "Cant find video",
-          smallImg: video.thumbnails.medium.url,
-          bigImg: video.thumbnails.high.url,
+          title: res.title ?? "Cant find video",
+          // smallImg: video.thumbnails.medium.url,
+          // bigImg: video.thumbnails.high.url,
+          smallImg:
+            (thumbnails.length > 1
+              ? thumbnails[thumbnails.length - 2].url
+              : thumbnails[thumbnails.length - 1].url) ??
+            "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+          bigImg:
+            thumbnails[thumbnails.length - 1].url ??
+            "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
         },
       });
 
@@ -455,7 +460,10 @@ export class RoomManager {
     if (lastAdded) {
       currentUser.ws.send(
         JSON.stringify({
-          type: "add-to-queue-not-allowed",
+          type: "error",
+          data: {
+            message: "You can add again after 20 min.",
+          },
         })
       );
       return;
