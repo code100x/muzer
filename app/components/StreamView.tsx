@@ -13,6 +13,9 @@ import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 //@ts-ignore
 import YouTubePlayer from 'youtube-player';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import {DEFAULT_LAMPORT, PUBLIC_KEY_ADDRESS} from "@/app/lib/constants"
 
 interface Video {
     "id": string,
@@ -43,6 +46,10 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>();
+
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
+
 
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
@@ -124,13 +131,62 @@ export default function StreamView({
     })
   }
 
-  const playNext = async () => {
+  const sendSOL = async() => {
+    if (!publicKey){
+        toast.error("Please connect the Wallet to continue");
+        return;
+    }
+
+    const lamports =  DEFAULT_LAMPORT;
+
+    const {
+        context: { slot: minContextSlot },
+        value: { blockhash, lastValidBlockHeight }
+    } = await connection.getLatestBlockhashAndContext();
+
+    const transaction = new Transaction().add(
+        SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: new PublicKey(PUBLIC_KEY_ADDRESS),
+            lamports,
+        })
+    );
+
+    const signature = await sendTransaction(transaction, connection, { minContextSlot });
+    await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+    return signature;
+  }
+
+  const playNext = async (streamId?:string) => {
+
     if (queue.length > 0) {
         try {
             setPlayNextLoader(true)
-            const data = await fetch('/api/streams/next', {
-                method: "GET",
-            })
+            let data;
+
+            if(streamId){
+                
+                const txnSig = await sendSOL();
+
+                if(!txnSig){
+                    toast.error("Please Try again !!");
+                    return;
+                }
+
+                data = await fetch('/api/streams/next', {
+                    method: "POST",
+                    body:JSON.stringify({
+                        streamId,
+                        txnSig,
+                    })
+                })
+            }
+            else{
+                data = await fetch('/api/streams/next', {
+                    method: "GET",
+                })
+            }   
+            
             const json = await data.json();
             setCurrentVideo(json.stream)
             setQueue(q => q.filter(x => x.id !== json.stream?.id))
@@ -197,6 +253,15 @@ export default function StreamView({
                                     {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                                     <span>{video.upvotes}</span>
                                     </Button>
+
+                                    <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => playNext(video.id)}
+                                    className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                                    >
+                                        Play Now
+                                    </Button>
                                 </div>
                                 </div>
                             </CardContent>
@@ -254,7 +319,7 @@ export default function StreamView({
                                 )}
                             </CardContent>
                         </Card>
-                        {playVideo && <Button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
+                        {playVideo && <Button disabled={playNextLoader} onClick={()=>playNext("")} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
                             <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
                         </Button>}
                         </div>
