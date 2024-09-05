@@ -26,7 +26,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (!socket && session.data?.user.id) {
       console.log("Connecting to ws");
-      const ws = new WebSocket("ws://localhost:8080");
+      const ws = new WebSocket(process.env.NEXT_PUBLIC_WSS_URL as string);
       ws.onopen = () => {
         setSocket(ws);
         setUser(session.data?.user);

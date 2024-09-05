@@ -1,0 +1,165 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+//@ts-ignore
+import { ChevronUp, ChevronDown, Play, Share2 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Appbar } from "../../components/Appbar";
+
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+import { YT_REGEX } from "../../lib/utils";
+
+import { useSocket } from "@/context/socket-context";
+import { useSession } from "next-auth/react";
+import NowPlaying from "./NowPlaying";
+import Queue from "./Queue";
+import AddSongForm from "./AddSongForm";
+
+export default function StreamView({
+  creatorId,
+  playVideo = false,
+}: {
+  creatorId: string;
+  playVideo: boolean;
+}) {
+  const [inputLink, setInputLink] = useState("");
+  const [queue, setQueue] = useState<Video[]>([]);
+  const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [playNextLoader, setPlayNextLoader] = useState(false);
+
+  const { socket, sendMessage } = useSocket();
+  const user = useSession().data?.user;
+
+  useEffect(() => {
+    if (socket) {
+      socket.onmessage = async (event) => {
+        const { type, data } = JSON.parse(event.data) || {};
+        if (type === "new-stream") {
+          addToQueue(data);
+        } else if (type === "new-vote") {
+          setQueue((prev) => {
+            return prev
+              .map((v) => {
+                if (v.id === data.streamId) {
+                  return {
+                    ...v,
+                    upvotes: v.upvotes + (data.vote === "upvote" ? 1 : -1),
+                    haveUpvoted:
+                      data.votedBy === user?.id
+                        ? data.vote === "upvote"
+                        : v.haveUpvoted,
+                  };
+                }
+                return v;
+              })
+              .sort((a, b) => b.upvotes - a.upvotes);
+          });
+        } else if (type === "error") {
+          enqueueToast("error", data.message);
+          setLoading(false);
+        } else if (type === "play-next") {
+          await refreshStreams();
+        }
+      };
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    refreshStreams();
+  }, []);
+
+  async function addToQueue(newStream: any) {
+    setQueue((prev) => [...prev, newStream]);
+    setInputLink("");
+    setLoading(false);
+  }
+
+  async function refreshStreams() {
+    try {
+      const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
+        credentials: "include",
+      });
+      const json = await res.json();
+      setQueue(
+        json.streams.sort((a: any, b: any) => (a.upvotes < b.upvotes ? 1 : -1))
+      );
+
+      setCurrentVideo((video) => {
+        if (video?.id === json.activeStream?.stream?.id) {
+          return video;
+        }
+        return json.activeStream.stream;
+      });
+    } catch (error) {
+      enqueueToast("error", "Something went wrong");
+    }
+    setPlayNextLoader(false);
+  }
+
+  const playNext = async () => {
+    setPlayNextLoader(true);
+    sendMessage("play-next", {
+      creatorId,
+      userId: user?.id,
+    });
+  };
+
+  const enqueueToast = (type: "error" | "success", message: string) => {
+    toast[type](message, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
+      <Appbar />
+      <div className="flex justify-center">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
+          <Queue creatorId={creatorId} queue={queue} userId={user?.id || ""} />
+          <div className="col-span-2">
+            <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
+              <AddSongForm
+                creatorId={creatorId}
+                userId={user?.id || ""}
+                enqueueToast={enqueueToast}
+                inputLink={inputLink}
+                loading={loading}
+                setInputLink={setInputLink}
+                setLoading={setLoading}
+              />
+
+              <NowPlaying
+                currentVideo={currentVideo}
+                playNext={playNext}
+                playNextLoader={playNextLoader}
+                playVideo={playVideo}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+    </div>
+  );
+}
