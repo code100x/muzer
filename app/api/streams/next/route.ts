@@ -1,4 +1,6 @@
+import { RPC_URI } from "@/app/lib/constants";
 import { prismaClient } from "@/app/lib/db";
+import { Connection } from "@solana/web3.js";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -6,7 +8,7 @@ import { z } from "zod";
 
 const playNextSchema = z.object({
     streamId: z.string().uuid(),
-    txSig: z.string(),
+    txnSig: z.string(),
 })
 
 export async function GET() {
@@ -73,7 +75,7 @@ export async function GET() {
 export async function POST(req:NextRequest){
 
     const session = await getServerSession();
-    // TODO: You can get rid of the db call here 
+    
     const user = await prismaClient.user.findFirst({
        where: {
            email: session?.user?.email ?? ""
@@ -89,19 +91,20 @@ export async function POST(req:NextRequest){
    }
 
     const data = await req.json();
-   
-    //TODO : CREATE A ZOD SCHEMA
 
-    const streamId = data.streamId as string;   
-    // const tx = data.tx as string;
+    const {streamId,txnSig} = playNextSchema.parse(data);
 
-    //TODO: VERIFY THE TX SIG
+    const connection = new Connection(RPC_URI);
+    
+    const txResponse = await connection.getTransaction(txnSig,{ maxSupportedTransactionVersion: 0, commitment:"confirmed" });
 
-    /*
-        const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-        const txResponse = await connection.getTransaction(txnId,{ maxSupportedTransactionVersion: 0 });
-    */  
-
+    if(!txResponse){
+        return NextResponse.json({
+            message:"Enter Valid Transaction Signature !"
+        },{
+            status:402,
+        })
+    }
 
     const nextStream = await prismaClient.stream.findUnique({
         where:{
