@@ -75,16 +75,14 @@ async function main() {
           data.url
         );
       } else if (type === "play-next") {
-        await RoomManager.getInstance().publisher.publish(
-          process.pid.toString(),
-          JSON.stringify({
-            type: "play-next",
-            data: {
-              creatorId: data.creatorId,
-              userId: data.userId,
-            },
-          })
-        );
+        await RoomManager.getInstance().queue.add("play-next", {
+          creatorId: data.creatorId,
+          userId: data.userId,
+        });
+      } else if (type === "remove-song") {
+        await RoomManager.getInstance().queue.add("remove-song", data);
+      } else if (type === "empty-queue") {
+        await RoomManager.getInstance().queue.add("empty-queue", data);
       }
     });
 

@@ -43,29 +43,10 @@ export default function AddSongForm({
     setInputLink("");
   };
 
-  const handleShare = () => {
-    const shareableLink = `${window.location.hostname}/creator/${creatorId}`;
-    navigator.clipboard.writeText(shareableLink).then(
-      () => {
-        enqueueToast("success", "Link copied to clipboard!");
-      },
-      (err) => {
-        console.error("Could not copy text: ", err);
-        enqueueToast("error", "Failed to copy link. Please try again.");
-      }
-    );
-  };
-
   return (
     <>
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold text-white">Add a song</h1>
-        <Button
-          onClick={handleShare}
-          className="bg-purple-700 hover:bg-purple-800 text-white"
-        >
-          <Share2 className="mr-2 h-4 w-4" /> Share
-        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-2">

@@ -1,16 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-//@ts-ignore
-import { ChevronUp, ChevronDown, Play, Share2 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "../../components/Appbar";
 
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import { YT_REGEX } from "../../lib/utils";
 
 import { useSocket } from "@/context/socket-context";
 import { useSession } from "next-auth/react";
@@ -63,6 +57,12 @@ export default function StreamView({
           setLoading(false);
         } else if (type === "play-next") {
           await refreshStreams();
+        } else if (type === "remove-song") {
+          setQueue((prev) => {
+            return prev.filter((stream) => stream.id !== data.streamId);
+          });
+        } else if (type === "empty-queue") {
+          setQueue([]);
         }
       };
     }
@@ -125,7 +125,12 @@ export default function StreamView({
       <Appbar />
       <div className="flex justify-center">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
-          <Queue creatorId={creatorId} queue={queue} userId={user?.id || ""} />
+          <Queue
+            creatorId={creatorId}
+            isCreator={playVideo}
+            queue={queue}
+            userId={user?.id || ""}
+          />
           <div className="col-span-2">
             <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
               <AddSongForm

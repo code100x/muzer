@@ -14,21 +14,23 @@ model CurrentStream {
 }
 
 model Stream {
-  id            String         @id
-  type          StreamType
-  active        Boolean        @default(true)
-  userId        String
-  extractedId   String
-  url           String
-  bigImg        String         @default("")
-  smallImg      String         @default("")
-  title         String         @default("")
-  createAt      DateTime       @default(now())
-  played        Boolean        @default(false)
-  playedTs      DateTime?
-  CurrentStream CurrentStream?
-  User          User           @relation(fields: [userId], references: [id])
-  Upvote        Upvote[]
+  id                        String         @id
+  type                      StreamType
+  active                    Boolean        @default(true)
+  userId                    String
+  extractedId               String
+  url                       String
+  bigImg                    String         @default("")
+  smallImg                  String         @default("")
+  title                     String         @default("")
+  createAt                  DateTime       @default(now())
+  played                    Boolean        @default(false)
+  playedTs                  DateTime?
+  addedBy                   String
+  CurrentStream             CurrentStream?
+  User_Stream_addedByToUser User           @relation("Stream_addedByToUser", fields: [addedBy], references: [id])
+  User                      User           @relation(fields: [userId], references: [id])
+  Upvote                    Upvote[]
 }
 
 model Upvote {
@@ -42,11 +44,12 @@ model Upvote {
 }
 
 model User {
-  id       String   @id
-  email    String   @unique
-  provider Provider
-  Stream   Stream[]
-  Upvote   Upvote[]
+  id                          String   @id
+  email                       String   @unique
+  provider                    Provider
+  Stream_Stream_addedByToUser Stream[] @relation("Stream_addedByToUser")
+  Stream                      Stream[]
+  Upvote                      Upvote[]
 }
 
 enum Provider {

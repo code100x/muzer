@@ -3,14 +3,22 @@ import { createClient, RedisClientType } from "redis";
 import { PrismaClient } from "@prisma/client";
 //@ts-ignore
 import youtubesearchapi from "youtube-search-api";
+import { Job, Queue, Worker } from "bullmq";
 
-const TIME_SPAN_FOR_VOTE = 1200000; // 20min
-const TIME_SPAN_FOR_QUEUE = 1200000; // 20min
+const TIME_SPAN_FOR_VOTE = 1200000 / 40; // 20min
+const TIME_SPAN_FOR_QUEUE = 1200000 / 40; // 20min
 const TIME_SPAN_FOR_REPEAT = 3600000;
 const MAX_QUEUE_LENGTH = 20;
 
+const connection = {
+  username: process.env.REDIS_USERNAME || "",
+  password: process.env.REDIS_PASSWORD || "",
+  host: process.env.REDIS_HOST || "",
+  port: parseInt(process.env.REDIS_PORT || "") || 6379,
+};
+
 const redisCredentials = {
-  url: process.env.REDIS_URL,
+  url: `redis://${connection.username}:${connection.password}@${connection.host}:${connection.port}`,
 };
 
 export class RoomManager {
@@ -21,6 +29,8 @@ export class RoomManager {
   public publisher: RedisClientType;
   public subscriber: RedisClientType;
   public prisma: PrismaClient;
+  public queue: Queue;
+  public worker: Worker;
 
   private constructor() {
     this.rooms = new Map();
@@ -29,6 +39,12 @@ export class RoomManager {
     this.publisher = createClient(redisCredentials);
     this.subscriber = createClient(redisCredentials);
     this.prisma = new PrismaClient();
+    this.queue = new Queue(process.pid.toString(), {
+      connection,
+    });
+    this.worker = new Worker(process.pid.toString(), this.processJob, {
+      connection,
+    });
   }
 
   static getInstance() {
@@ -39,30 +55,44 @@ export class RoomManager {
     return RoomManager.instance;
   }
 
+  async processJob(job: Job) {
+    const { data, name } = job;
+    if (name === "cast-vote") {
+      await RoomManager.getInstance().adminCastVote(
+        data.creatorId,
+        data.userId,
+        data.streamId,
+        data.vote
+      );
+    } else if (name === "add-to-queue") {
+      await RoomManager.getInstance().adminAddStreamHandler(
+        data.creatorId,
+        data.userId,
+        data.url,
+        data.existingActiveStream
+      );
+    } else if (name === "play-next") {
+      await RoomManager.getInstance().adminPlayNext(
+        data.creatorId,
+        data.userId
+      );
+    } else if (name === "remove-song") {
+      await RoomManager.getInstance().adminRemoveSong(
+        data.creatorId,
+        data.userId,
+        data.streamId
+      );
+    } else if (name === "empty-queue") {
+      await RoomManager.getInstance().adminEmptyQueue(data.creatorId);
+    }
+  }
+
   async initRedisClient() {
     await this.redisClient.connect();
     await this.subscriber.connect();
     await this.publisher.connect();
-
-    await this.subscriber.subscribe(process.pid.toString(), (message) => {
-      const { type, data } = JSON.parse(message);
-      if (type === "add-to-queue") {
-        RoomManager.getInstance().adminAddStreamHandler(
-          data.creatorId,
-          data.userId,
-          data.url,
-          data.existingActiveStream
-        );
-      } else if (type === "cast-vote") {
-        RoomManager.getInstance().adminCastVote(
-          data.creatorId,
-          data.userId,
-          data.streamId,
-          data.vote
-        );
-      } else if (type === "play-next") {
-        RoomManager.getInstance().adminPlayNext(data.creatorId, data.userId);
-      }
+    this.worker.on("error", () => {
+      console.log("Worker  ready");
     });
   }
 
@@ -79,6 +109,10 @@ export class RoomManager {
       );
     } else if (type === "play-next") {
       RoomManager.getInstance().publishPlayNext(creatorId);
+    } else if (type === "remove-song") {
+      RoomManager.getInstance().publishRemoveSong(creatorId, data.streamId);
+    } else if (type === "empty-queue") {
+      RoomManager.getInstance().publishEmptyQueue(creatorId);
     }
   }
 
@@ -136,8 +170,82 @@ export class RoomManager {
     }
   }
 
+  publishEmptyQueue(creatorId: string) {
+    const room = this.rooms.get(creatorId);
+    room?.spectators.forEach((spectator) => {
+      const user = this.users.get(spectator);
+      user?.ws.send(
+        JSON.stringify({
+          type: "empty-queue",
+        })
+      );
+    });
+  }
+
+  async adminEmptyQueue(creatorId: string) {
+    const user = this.users.get(creatorId);
+    const room = this.rooms.get(creatorId);
+
+    if (room && user) {
+      await this.prisma.stream.updateMany({
+        where: {
+          userId: creatorId,
+          played: false,
+        },
+        data: {
+          played: true,
+          playedTs: new Date(),
+        },
+      });
+      await this.publisher.publish(
+        creatorId,
+        JSON.stringify({
+          type: "empty-queue",
+        })
+      );
+    }
+  }
+
+  publishRemoveSong(creatorId: string, streamId: string) {
+    console.log("publishRemoveSong");
+    const room = this.rooms.get(creatorId);
+    room?.spectators.forEach((spectator) => {
+      const user = this.users.get(spectator);
+      user?.ws.send(
+        JSON.stringify({
+          type: "remove-song",
+          data: {
+            streamId,
+          },
+        })
+      );
+    });
+  }
+
+  async adminRemoveSong(creatorId: string, userId: string, streamId: string) {
+    console.log("adminRemoveSong");
+    const user = this.users.get(userId);
+    if (user) {
+      await this.prisma.stream.delete({
+        where: {
+          id: streamId,
+          userId: creatorId,
+        },
+      });
+
+      await this.publisher.publish(
+        creatorId,
+        JSON.stringify({
+          type: "remove-song",
+          data: {
+            streamId,
+          },
+        })
+      );
+    }
+  }
+
   publishPlayNext(creatorId: string) {
-    console.log("publishPlayNext");
     const room = this.rooms.get(creatorId);
     room?.spectators.forEach((spectator) => {
       const user = this.users.get(spectator);
@@ -331,18 +439,12 @@ export class RoomManager {
       return;
     }
 
-    await this.publisher.publish(
-      process.pid.toString(),
-      JSON.stringify({
-        type: "cast-vote",
-        data: {
-          creatorId,
-          userId,
-          streamId,
-          vote,
-        },
-      })
-    );
+    await this.queue.add("cast-vote", {
+      creatorId,
+      userId,
+      streamId,
+      vote,
+    });
   }
 
   publishNewStream(creatorId: string, data: any) {
@@ -384,7 +486,6 @@ export class RoomManager {
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
 
-    // const video = items?.[0]?.snippet;
     if (res.thumbnail) {
       const thumbnails = res.thumbnail.thumbnails;
       thumbnails.sort((a: { width: number }, b: { width: number }) =>
@@ -397,6 +498,7 @@ export class RoomManager {
           url: url,
           extractedId,
           type: "Youtube",
+          addedBy: userId,
           title: res.title ?? "Cant find video",
           // smallImg: video.thumbnails.medium.url,
           // bigImg: video.thumbnails.high.url,
@@ -509,18 +611,12 @@ export class RoomManager {
       return;
     }
 
-    await this.publisher.publish(
-      process.pid.toString(),
-      JSON.stringify({
-        type: "add-to-queue",
-        data: {
-          creatorId,
-          userId: currentUser.userId,
-          url,
-          existingActiveStream: previousQueueLength,
-        },
-      })
-    );
+    await this.queue.add("add-to-queue", {
+      creatorId,
+      userId: currentUser.userId,
+      url,
+      existingActiveStream: previousQueueLength,
+    });
   }
 
   disconnect(ws: WebSocket) {

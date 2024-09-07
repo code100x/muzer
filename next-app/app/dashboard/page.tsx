@@ -35,11 +35,11 @@ export default function Component() {
     }
   }, [user]);
 
-  if (!session.data) {
+  if (!user) {
     return <h1>Please Log in....</h1>;
   }
 
-  return <StreamView creatorId={session.data.user.id} playVideo={true} />;
+  return <StreamView creatorId={user.id} playVideo={true} />;
 }
 
 export const dynamic = "auto";
