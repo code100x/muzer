@@ -11,6 +11,7 @@ import {
   Trash2,
   X,
   Video,
+  Trash,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { url } from "inspector";
 import credentials from "next-auth/providers/credentials";
+import axios from "axios";
 
 interface Video {
   id: string;
@@ -134,6 +136,22 @@ export default function StreamView({
     setInputLink("");
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await axios.delete(`/api/streams?id=${id}`);
+
+      if (response.status === 200) {
+        toast.success("Stream deleted successfully!");
+        console.log("Track removed successfully:", response.data);
+      } else {
+        toast.error("Failed to delete stream.");
+        console.error("Failed to remove track:", response.data);
+      }
+    } catch (error) {
+      toast.error("Error occurred while deleting stream.");
+      console.error("Error occurred while removing track:", error);
+    }
+  };
   const handleVote = (id: string, isUpvote: boolean) => {
     setQueue(
       queue
@@ -230,7 +248,7 @@ export default function StreamView({
                       <h3 className="font-semibold text-white">
                         {video.title}
                       </h3>
-                      <div className="flex items-center space-x-2 mt-2">
+                      <div className="flex items-center space-x-6 mt-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -248,6 +266,15 @@ export default function StreamView({
                             <ChevronUp className="h-4 w-4" />
                           )}
                           <span>{video.upvotes}</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(video.id)}
+                          className="flex items-center space-x-1 bg-red-600 text-white border-red-500 hover:bg-red-500"
+                        >
+                          <Trash className="h-4 w-4" />
+                          {/* <span>Remove Track</span> */}
                         </Button>
                       </div>
                     </div>

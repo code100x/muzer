@@ -266,3 +266,31 @@ export async function GET(req: NextRequest) {
     isCreator,
   });
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    await prismaClient.stream.delete({
+      where: { id: id },
+    });
+
+    return NextResponse.json(
+      { message: "Stream deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting stream:", error);
+    return NextResponse.json(
+      { error: "Failed to delete stream" },
+      { status: 500 }
+    );
+  } finally {
+    await prismaClient.$disconnect();
+  }
+}
