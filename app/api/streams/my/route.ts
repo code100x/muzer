@@ -1,23 +1,19 @@
-import { prismaClient } from "@/app/lib/db";
+import { prismaClient } from "@/lib/db";
+import { authOptions } from "@/lib/auth-options";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-    const session = await getServerSession();
-     // TODO: You can get rid of the db call here 
-     const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
+    const session = await getServerSession(authOptions);
 
-    if (!user) {
+    if (!session?.user) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
             status: 403
         })
     }
+    const user = session.user;
 
     
     const streams = await prismaClient.stream.findMany({
