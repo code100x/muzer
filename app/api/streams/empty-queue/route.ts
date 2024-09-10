@@ -1,22 +1,19 @@
-import { prismaClient } from "@/app/lib/db";
+import { authOptions } from "@/lib/auth-options";
+import { prismaClient } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST() {
-    const session = await getServerSession();
-    const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
+    const session = await getServerSession(authOptions);
 
-    if (!user) {
+    if (!session?.user) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
             status: 403
         });
     }
+    const user = session.user
 
     try {
         await prismaClient.stream.updateMany({

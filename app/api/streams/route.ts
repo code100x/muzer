@@ -1,10 +1,11 @@
-import { prismaClient } from "@/app/lib/db";
+import { prismaClient } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 //@ts-ignore
 import youtubesearchapi from "youtube-search-api";
-import { YT_REGEX } from "@/app/lib/utils";
+import { YT_REGEX } from "@/lib/utils";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
 
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
@@ -15,20 +16,16 @@ const MAX_QUEUE_LEN = 20;
 
 export async function POST(req: NextRequest) {
     try {
-        const session = await getServerSession();
-        const user = await prismaClient.user.findFirst({
-            where: {
-                email: session?.user?.email ?? ""
-            }
-        });
+        const session = await getServerSession(authOptions)
 
-        if (!user) {
+        if (!session?.user.id) {
             return NextResponse.json({
                 message: "Unauthenticated"
             }, {
                 status: 403
             });
         }
+        const user = session.user
 
         const data = CreateStreamSchema.parse(await req.json());
         
@@ -161,20 +158,16 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
     const creatorId = req.nextUrl.searchParams.get("creatorId");
-    const session = await getServerSession();
-    const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
+    const session = await getServerSession(authOptions)
 
-    if (!user) {
+    if (!session?.user.id) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
             status: 403
         })
     }
+    const user = session.user
 
     if (!creatorId) {
         return NextResponse.json({

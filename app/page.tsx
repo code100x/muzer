@@ -1,14 +1,16 @@
-"use client";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 //@ts-ignore
 import { Users, Radio, Headphones } from "lucide-react"
-import { Appbar } from "./components/Appbar"
-import useRedirect from "./hooks/useRedirect"
+import { Appbar } from "@/components/Appbar"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import { redirect } from "next/navigation"
 
-export default function LandingPage() {
-  useRedirect();
+export default async function LandingPage() {
+  const session = await getServerSession(authOptions);
+  if (session?.user.id) redirect("/dashboard");
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">

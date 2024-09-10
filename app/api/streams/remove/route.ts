@@ -1,4 +1,5 @@
-import { prismaClient } from "@/app/lib/db";
+import { authOptions } from "@/lib/auth-options";
+import { prismaClient } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -8,20 +9,16 @@ const RemoveStreamSchema = z.object({
 });
 
 export async function DELETE(req: NextRequest) {
-    const session = await getServerSession();
-    const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? ""
-        }
-    });
+    const session = await getServerSession(authOptions);
 
-    if (!user) {
+    if (!session?.user.id) {
         return NextResponse.json({
             message: "Unauthenticated"
         }, {
             status: 403
         });
     }
+    const user = session.user
 
     try {
         const { searchParams } = new URL(req.url)
