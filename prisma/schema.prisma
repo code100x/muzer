@@ -19,6 +19,7 @@ model User {
   provider  Provider
   streams   Stream[]  @relation("user")
   upvotes   Upvote[]
+  addedStreams Stream[] @relation("addedBy")
 }
 
 model Stream {
@@ -37,6 +38,8 @@ model Stream {
   userId        String
   user          User        @relation(fields: [userId], references: [id], name: "user")
   currentStream CurrentStream?
+  addedBy   String
+  addedByUser User @relation("addedBy", fields: [addedBy], references: [id])
 }
 
 model CurrentStream {

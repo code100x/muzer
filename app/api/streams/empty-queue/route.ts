@@ -1,14 +1,9 @@
 import { authOptions } from "@/lib/auth-options";
 import db from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from "next/server";
 
-const UpvoteSchema = z.object({
-  streamId: z.string(),
-});
-
-export async function POST(req: NextRequest) {
+export async function POST() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -24,23 +19,28 @@ export async function POST(req: NextRequest) {
   const user = session.user;
 
   try {
-    const data = UpvoteSchema.parse(await req.json());
-    await db.upvote.create({
-      data: {
+    await db.stream.updateMany({
+      where: {
         userId: user.id,
-        streamId: data.streamId,
+        played: false,
+      },
+      data: {
+        played: true,
+        playedTs: new Date(),
       },
     });
+
     return NextResponse.json({
-      message: "Done!",
+      message: "Queue emptied successfully",
     });
-  } catch (e) {
+  } catch (error) {
+    console.error("Error emptying queue:", error);
     return NextResponse.json(
       {
-        message: "Error while upvoting",
+        message: "Error while emptying the queue",
       },
       {
-        status: 403,
+        status: 500,
       },
     );
   }
