@@ -1,24 +1,19 @@
-import { prismaClient } from "@/app/lib/db";
+import { authOptions } from "@/lib/auth-options";
+import { prismaClient } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const session = await getServerSession();
-    // TODO: You can get rid of the db call here 
-    const user = await prismaClient.user.findFirst({
-       where: {
-           email: session?.user?.email ?? ""
-       }
-   });
+    const session = await getServerSession(authOptions);
 
-   if (!user) {
+   if (!session?.user.id) {
        return NextResponse.json({
            message: "Unauthenticated"
        }, {
            status: 403
        })
    }
-   console.log("before first call");
+   const user = session.user
 
    const mostUpvotedStream = await prismaClient.stream.findFirst({
         where: {
@@ -31,8 +26,6 @@ export async function GET() {
             }
         }
    });
-   console.log("after first call");
-   console.log(mostUpvotedStream?.id )
  
    await Promise.all([prismaClient.currentStream.upsert({
         where: {

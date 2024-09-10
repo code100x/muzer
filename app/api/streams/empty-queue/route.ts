@@ -1,14 +1,9 @@
 import { authOptions } from "@/lib/auth-options";
 import { prismaClient } from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from "next/server";
 
-const UpvoteSchema = z.object({
-    streamId: z.string(),
-})
-
-export async function POST(req: NextRequest) {
+export async function POST() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -16,27 +11,31 @@ export async function POST(req: NextRequest) {
             message: "Unauthenticated"
         }, {
             status: 403
-        })
+        });
     }
     const user = session.user
 
     try {
-        const data = UpvoteSchema.parse(await req.json());
-        await prismaClient.upvote.create({
-            data: {
+        await prismaClient.stream.updateMany({
+            where: {
                 userId: user.id,
-                streamId: data.streamId
+                played: false
+            },
+            data: {
+                played: true,
+                playedTs: new Date()
             }
         });
-        return NextResponse.json({
-            message: "Done!"
-        })
-    } catch(e) {
-        return NextResponse.json({
-            message: "Error while upvoting"
-        }, {
-            status: 403
-        })
-    }
 
+        return NextResponse.json({
+            message: "Queue emptied successfully"
+        });
+    } catch (error) {
+        console.error("Error emptying queue:", error);
+        return NextResponse.json({
+            message: "Error while emptying the queue"
+        }, {
+            status: 500
+        });
+    }
 }
