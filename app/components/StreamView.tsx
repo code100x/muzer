@@ -219,7 +219,7 @@ export default function StreamView({
                 const txnSig = await sendSOL();
 
                 if(!txnSig){
-                    toast.error("Please Try again !!");
+                    toast.error("Can't get the Transaction details!!");
                     return;
                 }
 
