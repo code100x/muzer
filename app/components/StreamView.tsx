@@ -3,7 +3,15 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronUp, ChevronDown, Share2, Play, Trash2, X } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  Share2,
+  Play,
+  Trash2,
+  Trash,
+  X,
+} from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "./Appbar";
@@ -286,7 +294,7 @@ export default function StreamView({
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4">
+              <div className="max-h-screen overflow-y-auto space-y-4 scrollbar-custom">
                 {queue.map((video) => (
                   <Card
                     key={video.id}
@@ -323,9 +331,9 @@ export default function StreamView({
                               variant="outline"
                               size="sm"
                               onClick={() => removeSong(video.id)}
-                              className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+                              className="bg-red-600 hover:bg-red-700 border-0 text-white transition-colors"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash className="h-4 w-4 text-white-500" />
                             </Button>
                           )}
                         </div>
