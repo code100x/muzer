@@ -149,31 +149,6 @@ export default function StreamView({
     }
   }
 
-//   const handleShare = () => {
-//     const shareableLink = `${window.location.hostname}/creator/${creatorId}`
-//     navigator.clipboard.writeText(shareableLink).then(() => {
-//       toast.success('Link copied to clipboard!', {
-//         position: "top-right",
-//         autoClose: 3000,
-//         hideProgressBar: false,
-//         closeOnClick: true,
-//         pauseOnHover: true,
-//         draggable: true,
-//         progress: undefined,
-//       })
-//     }, (err) => {
-//       console.error('Could not copy text: ', err)
-//       toast.error('Failed to copy link. Please try again.', {
-//         position: "top-right",
-//         autoClose: 3000,
-//         hideProgressBar: false,
-//         closeOnClick: true,
-//         pauseOnHover: true,
-//         draggable: true,
-//         progress: undefined,
-//       })
-//     })
-//   }
 
   return (
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
