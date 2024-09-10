@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@prisma/client": "5.19.0",
+    "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.0",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
@@ -40,6 +41,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/youtube-player": "^5.5.11",
     "eslint": "^8",
     "eslint-config-next": "14.2.7",
     "postcss": "^8",
