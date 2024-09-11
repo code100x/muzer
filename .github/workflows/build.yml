@@ -17,13 +17,16 @@ jobs:
           node-version: "20"
 
       - name: Install pnpm
-        run: cd next-app && npm install -g pnpm
+        run: npm install -g pnpm
 
       - name: Install Dependencies
+        working-directory: next-app
         run: pnpm install
 
       - name: Generate Prisma client
+        working-directory: next-app
         run: pnpm run postinstall
 
       - name: Run Build
+        working-directory: next-app
         run: pnpm run build
