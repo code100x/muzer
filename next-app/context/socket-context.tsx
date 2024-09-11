@@ -1,4 +1,3 @@
-import { User } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import {
   PropsWithChildren,
@@ -11,21 +10,23 @@ import {
 type SocketContextType = {
   socket: null | WebSocket;
   user: null | { id: string };
+  connectionError: boolean;
 };
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   user: null,
+  connectionError: false,
 });
 
 export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [user, setUser] = useState<{ id: string } | null>(null);
+  const [connectionError, setConnectionError] = useState<boolean>(false);
   const session = useSession();
 
   useEffect(() => {
     if (!socket && session.data?.user.id) {
-      console.log("Connecting to ws");
       const ws = new WebSocket(process.env.NEXT_PUBLIC_WSS_URL as string);
       ws.onopen = () => {
         setSocket(ws);
@@ -38,6 +39,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
 
       ws.onerror = () => {
         setSocket(null);
+        setConnectionError(true);
       };
 
       () => {
@@ -51,6 +53,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
       value={{
         socket,
         user,
+        connectionError,
       }}
     >
       {children}
@@ -59,16 +62,16 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const useSocket = () => {
-  const { socket, user } = useContext(SocketContext);
+  const { socket, user, connectionError } = useContext(SocketContext);
 
   const sendMessage = (type: string, data: { [key: string]: any }) => {
     socket?.send(
       JSON.stringify({
         type,
         data,
-      })
+      }),
     );
   };
 
-  return { socket, sendMessage, user };
+  return { socket, sendMessage, user, connectionError };
 };
