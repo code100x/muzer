@@ -69,7 +69,7 @@ export default function AddSongForm({
       {inputLink && inputLink.match(YT_REGEX) && !loading && (
         <Card className="bg-gray-900 border-gray-800">
           <CardContent className="p-4">
-            <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
+            <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1].split("&")[0]} />
           </CardContent>
         </Card>
       )}
