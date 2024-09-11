@@ -42,7 +42,7 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
       (err) => {
         console.error("Could not copy text: ", err);
         toast.error("Failed to copy link. Please try again.");
-      }
+      },
     );
   };
 

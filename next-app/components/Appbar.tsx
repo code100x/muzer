@@ -1,12 +1,12 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 export function Appbar() {
   const session = useSession();
 
   return (
-    <div className="flex justify-between px-20 pt-4">
+    <div className="flex justify-between px-5 md:px-10 xl:px-20 py-4">
       <div className="text-lg font-bold flex flex-col justify-center text-white">
         Muzer
       </div>
@@ -14,7 +14,7 @@ export function Appbar() {
         {session.data?.user && (
           <Button
             className="bg-purple-600 text-white hover:bg-purple-700"
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: "/" })}
           >
             Logout
           </Button>
@@ -22,7 +22,7 @@ export function Appbar() {
         {!session.data?.user && (
           <Button
             className="bg-purple-600 text-white hover:bg-purple-700"
-            onClick={() => signIn()}
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
           >
             Signin
           </Button>

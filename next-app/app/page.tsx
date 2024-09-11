@@ -29,7 +29,7 @@ export default async function LandingPage() {
             </div>
             <div className="space-x-4">
               <Button className="bg-purple-600 text-white hover:bg-purple-700">
-                <Link href="/dashboard">Get Started</Link>
+                <Link href="/signin">Get Started</Link>
               </Button>
               <Button
                 variant="outline"

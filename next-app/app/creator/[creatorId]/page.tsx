@@ -24,7 +24,7 @@ export default function Creator({
           creatorId: creatorId,
           userId: user.id,
         },
-        process.env.NEXT_PUBLIC_SECRET ?? "secret"
+        process.env.NEXT_PUBLIC_SECRET ?? "secret",
       );
 
       socket?.send(
@@ -33,7 +33,7 @@ export default function Creator({
           data: {
             token,
           },
-        })
+        }),
       );
     }
   }, [user]);
