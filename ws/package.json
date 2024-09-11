@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "nodemon src/app.ts",
-    "start": "prisma generate && tsc -b && node dist/app.js"
+    "start": "node dist/app.js",
+    "build": "prisma generate && tsc -b"
   },
   "keywords": [],
   "author": "",
