@@ -19,7 +19,7 @@ export default function Component() {
         process.env.NEXT_PUBLIC_SECRET || "",
         {
           expiresIn: "24h",
-        }
+        },
       );
 
       socket?.send(
@@ -28,7 +28,7 @@ export default function Component() {
           data: {
             token,
           },
-        })
+        }),
       );
     }
   }, [user]);

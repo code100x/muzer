@@ -66,7 +66,7 @@ export const useSocket = () => {
       JSON.stringify({
         type,
         data,
-      })
+      }),
     );
   };
 
