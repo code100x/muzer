@@ -44,7 +44,8 @@ export async function POST(req: NextRequest) {
     }
 
     const isYt = data.url.match(YT_REGEX);
-    if (!isYt) {
+    const videoId = data.url ? data.url.match(YT_REGEX)?.[1] : null;
+    if (!isYt || !videoId) {
       return NextResponse.json(
         {
           message: "Invalid YouTube URL format",
@@ -55,7 +56,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const videoId = data.url ? data.url.match(YT_REGEX)?.[1] : null;
     const res = await youtubesearchapi.GetVideoDetails(videoId);
 
     // Check if the user is not the creator
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
         userId: data.creatorId,
         addedBy: user.id,
         url: data.url,
-        extractedId:videoId,
+        extractedId: videoId,
         type: "Youtube",
         title: res.title ?? "Can't find video",
         smallImg:
