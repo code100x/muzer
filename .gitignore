@@ -1,6 +1,7 @@
-.next
-node_modules
-dist
-.env
+*/node_modules
+*/.env
+*/.next
+*/dist
+*/package-lock.json
 .DS_Store
-package-lock.json
+*/.DS_Store
