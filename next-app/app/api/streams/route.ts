@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const extractedId = data.url.split("?v=")[1].split("&")[0];
-    const res = await youtubesearchapi.GetVideoDetails(extractedId);
+    const videoId = data.url ? data.url.match(YT_REGEX)?.[1] : null;
+    const res = await youtubesearchapi.GetVideoDetails(videoId);
 
     // Check if the user is not the creator
     if (user.id !== data.creatorId) {
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       const duplicateSong = await db.stream.findFirst({
         where: {
           userId: data.creatorId,
-          extractedId: extractedId,
+          extractedId: videoId,
           createAt: {
             gte: tenMinutesAgo,
           },
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
         userId: data.creatorId,
         addedBy: user.id,
         url: data.url,
-        extractedId,
+        extractedId:videoId,
         type: "Youtube",
         title: res.title ?? "Can't find video",
         smallImg:

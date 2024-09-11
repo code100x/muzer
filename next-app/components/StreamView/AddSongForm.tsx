@@ -42,6 +42,8 @@ export default function AddSongForm({
     setInputLink("");
   };
 
+  const videoId = inputLink ? inputLink.match(YT_REGEX)?.[1] : undefined;
+
   return (
     <>
       <div className="flex justify-between items-center">
@@ -66,10 +68,10 @@ export default function AddSongForm({
         </Button>
       </form>
 
-      {inputLink && inputLink.match(YT_REGEX) && !loading && (
+      {videoId && !loading && (
         <Card className="bg-gray-900 border-gray-800">
           <CardContent className="p-4">
-            <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1].split("&")[0]} />
+            <LiteYouTubeEmbed title="" id={videoId} />
           </CardContent>
         </Card>
       )}
