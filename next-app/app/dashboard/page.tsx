@@ -1,14 +1,12 @@
 "use client";
 import { useEffect } from "react";
 import { useSocket } from "@/context/socket-context";
-import { useSession } from "next-auth/react";
-import useRedirect from "../hooks/useRedirect";
+import useRedirect from "../../hooks/useRedirect";
 import jwt from "jsonwebtoken";
-import StreamView from "../components/StreamView";
+import StreamView from "../../components/StreamView";
 
 export default function Component() {
   const { socket, user } = useSocket();
-  const session = useSession();
   useRedirect();
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { YT_REGEX } from "@/app/lib/utils";
+import { YT_REGEX } from "@/lib/utils";
 import { useSocket } from "@/context/socket-context";
 import React from "react";
 import { Button } from "@/components/ui/button";

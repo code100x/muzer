@@ -1,15 +1,18 @@
-FROM node:22.6.0
+FROM node:22-alpine
 
 WORKDIR /app
+
 COPY package.json .
 
-RUN npm install
+RUN npm install pnpm -g
+
+RUN pnpm install
 
 COPY . .
 
 RUN DATABASE_URL=$DATABASE_URL npx prisma generate
-RUN DATABASE_URL=$DATABASE_URL npm run build
+RUN DATABASE_URL=$DATABASE_URL pnpm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]

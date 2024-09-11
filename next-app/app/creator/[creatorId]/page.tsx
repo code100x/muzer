@@ -1,6 +1,6 @@
 "use client";
-import StreamView from "@/app/components/StreamView";
-import useRedirect from "@/app/hooks/useRedirect";
+import StreamView from "@/components/StreamView";
+import useRedirect from "@/hooks/useRedirect";
 import { useSocket } from "@/context/socket-context";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";

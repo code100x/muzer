@@ -1,0 +1,53 @@
+services:
+  app:
+    container_name: muzer-docker
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    ports:
+      - ${APP_PORT}:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+
+  postgres:
+    container_name: prisma-postgres
+    image: postgres:alpine
+    restart: always
+    env_file:
+     - .env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - ${POSTGRES_PATH}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prisma-studio:
+    container_name: prisma-studio
+    image: timothyjmiller/prisma-studio:latest
+    restart: unless-stopped
+    env_file:
+     - .env
+    depends_on:
+      - app
+    ports:
+      - ${PRISMA_STUDIO_PORT}:5555
+
+volumes:
+  postgres-data:
+    external: false

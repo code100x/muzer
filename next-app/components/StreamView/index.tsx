@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Appbar } from "../../components/Appbar";
 
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
@@ -11,6 +10,7 @@ import { useSession } from "next-auth/react";
 import NowPlaying from "./NowPlaying";
 import Queue from "./Queue";
 import AddSongForm from "./AddSongForm";
+import { Appbar } from "../Appbar";
 
 export default function StreamView({
   creatorId,
