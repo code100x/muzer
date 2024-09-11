@@ -7,7 +7,8 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "nodemon src/app.ts",
     "start": "node dist/app.js",
-    "build": "prisma generate && tsc -b"
+    "build": "prisma generate && npx tsc -b",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -25,10 +26,10 @@
     "youtube-search-api": "^1.2.2"
   },
   "devDependencies": {
-    "@types/dotenv": "^8.2.0",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/ws": "^8.5.12",
     "nodemon": "^3.1.4",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
   }
 }

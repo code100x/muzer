@@ -10,7 +10,6 @@ RUN pnpm install --ignore-scripts
 
 COPY . .
 
-RUN DATABASE_URL=$DATABASE_URL npx prisma generate
 RUN DATABASE_URL=$DATABASE_URL pnpm run build
 
 EXPOSE 3000
