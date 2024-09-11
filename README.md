@@ -1,5 +1,7 @@
 <h1 align='center'>Muzer</h1>
 
+Muzer is a music streaming app designed to let users create and share playlists, enjoy their favorite tracks, and upvote top streams. It features a frontend built with Next.js, database management via Prisma, and containerization with Docker.
+
 ## Table of contents
 
 
