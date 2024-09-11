@@ -1,22 +1,13 @@
-"use client"
-import { useSession } from 'next-auth/react'
+import StreamView from "@/components/StreamView";
+import { authOptions } from "@/lib/auth-options";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-import StreamView from '@/app/components/StreamView'
-import useRedirect from '@/app/hooks/useRedirect';
+export default async function Component() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) redirect("/");
 
-export default function Component() {
-    const session = useSession();
-    const redirect = useRedirect();
-    try {
-        if (!session.data?.user.id) {
-            return (
-                <h1>Please Log in....</h1>
-            )
-        }
-        return <StreamView creatorId={session.data.user.id} playVideo={true} />
-    } catch(e) {
-        return null
-    }
+  return <StreamView creatorId={session.user.id} playVideo={true} />;
 }
 
-export const dynamic = 'auto'
+export const dynamic = "auto";
