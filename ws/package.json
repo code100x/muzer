@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "nodemon src/app.ts",
     "start": "node dist/app.js",
     "build": "prisma generate && tsc -b"
