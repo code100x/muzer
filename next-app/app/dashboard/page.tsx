@@ -6,15 +6,15 @@ import jwt from "jsonwebtoken";
 import StreamView from "../../components/StreamView";
 
 export default function Component() {
-  const { socket, user } = useSocket();
+  const { socket, user, connectionError } = useSocket();
   useRedirect();
 
   useEffect(() => {
     if (user) {
       const token = jwt.sign(
         {
-          creatorId: user.id,
-          userId: user.id,
+          creatorId: user?.id,
+          userId: user?.id,
         },
         process.env.NEXT_PUBLIC_SECRET || "",
         {
@@ -32,6 +32,10 @@ export default function Component() {
       );
     }
   }, [user]);
+
+  if (connectionError) {
+    return <h1>Cannot connect to socket server</h1>;
+  }
 
   if (!user) {
     return <h1>Please Log in....</h1>;

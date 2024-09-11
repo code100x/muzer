@@ -42,8 +42,8 @@ async function main() {
           data.token,
           process.env.NEXTAUTH_SECRET as string,
           (err: any, decoded: any) => {
-            console.log(err);
             if (err) {
+              console.log(err);
               ws.send(
                 JSON.stringify({
                   type: "error",
