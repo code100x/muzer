@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronUp, ChevronDown, Share2, Play, Trash2, X } from "lucide-react";
+import { ChevronUp, ChevronDown, Share2, Play, Trash2, X, MessageCircle, Instagram, Twitter} from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "./Appbar";
@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogTrigger
 } from "@/components/ui/dialog";
 
 interface Video {
@@ -64,6 +65,7 @@ export default function StreamView({
   const [creatorUserId, setCreatorUserId] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   async function refreshStreams() {
     try {
@@ -204,18 +206,60 @@ export default function StreamView({
     }
   };
 
-  const handleShare = () => {
-    const shareableLink = `${window.location.origin}/creator/${creatorId}`;
-    navigator.clipboard.writeText(shareableLink).then(
-      () => {
-        toast.success("Link copied to clipboard!");
-      },
-      (err) => {
-        console.error("Could not copy text: ", err);
-        toast.error("Failed to copy link. Please try again.");
-      },
-    );
-  };
+  const handleShare = (platform: 'whatsapp' | 'twitter' | 'instagram' | 'clipboard') => {
+    const shareableLink = `${window.location.hostname}/creator/${creatorId}`
+
+    if (platform === 'clipboard') {
+      navigator.clipboard.writeText(shareableLink).then(() => {
+        toast.success('Link copied to clipboard!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        })
+      }).catch((err) => {
+        console.error('Could not copy text: ', err)
+        toast.error('Failed to copy link. Please try again.', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        })
+      })
+    } else {
+      let url
+      switch (platform) {
+        case 'whatsapp':
+          url = `https://wa.me/?text=${encodeURIComponent(shareableLink)}`
+          break
+        case 'twitter':
+          url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareableLink)}`
+          break
+        case 'instagram':
+          // Instagram doesn't allow direct URL sharing, so we copy the link instead
+          navigator.clipboard.writeText(shareableLink)
+          toast.success('Link copied for Instagram sharing!', {
+            position: 'top-right',
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          })
+          return
+        default:
+          return
+      }
+      window.open(url, '_blank')
+    }
+  }
 
   const emptyQueue = async () => {
     try {
@@ -263,12 +307,47 @@ export default function StreamView({
                 Upcoming Songs
               </h2>
               <div className="flex space-x-2">
-                <Button
-                  onClick={handleShare}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
-                >
-                  <Share2 className="mr-2 h-4 w-4" /> Share
-                </Button>
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => setIsOpen(true)} className="bg-purple-700 hover:bg-purple-800 text-white">
+            <Share2 className="mr-2 h-4 w-4" /> Share
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share to Social Media</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-around py-4">
+            <Button
+              onClick={() => handleShare('whatsapp')}
+              className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2"
+            >
+              <MessageCircle className="h-6 w-6" />
+              <span className="sr-only">Share on WhatsApp</span>
+            </Button>
+            <Button
+              onClick={() => handleShare('twitter')}
+              className="bg-blue-400 hover:bg-blue-500 text-white rounded-full p-2"
+            >
+              <Twitter className="h-6 w-6" />
+              <span className="sr-only">Share on Twitter</span>
+            </Button>
+            <Button
+              onClick={() => handleShare('instagram')}
+              className="bg-pink-500 hover:bg-pink-600 text-white rounded-full p-2"
+            >
+              <Instagram className="h-6 w-6" />
+              <span className="sr-only">Share on Instagram</span>
+            </Button>
+          </div>
+          <Button
+            onClick={() => handleShare('clipboard')}
+            className="bg-gray-500 hover:bg-gray-600 text-white w-full mt-4"
+          >
+            Copy Link to Clipboard
+          </Button>
+        </DialogContent>
+      </Dialog>
                 {isCreator && (
                   <Button
                     onClick={() => setIsEmptyQueueDialogOpen(true)}
