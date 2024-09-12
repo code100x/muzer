@@ -5,10 +5,12 @@ import { z } from "zod";
 import youtubesearchapi from "youtube-search-api";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/authOptions";
 
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
-    url: z.string()
+    url: z.string(),
+    spaceId:z.string()
 });
 
 const MAX_QUEUE_LEN = 20;
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest) {
 
         const existingActiveStreams = await prismaClient.stream.count({
             where: {
-                userId: data.creatorId,
+                spaceId: data.spaceId,
                 played: false
             }
         });
@@ -140,7 +142,8 @@ export async function POST(req: NextRequest) {
                 type: "Youtube",
                 title: res.title ?? "Can't find video",
                 smallImg: (thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : thumbnails[thumbnails.length - 1].url) ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
-                bigImg: thumbnails[thumbnails.length - 1].url ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg"
+                bigImg: thumbnails[thumbnails.length - 1].url ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+                spaceId:data.spaceId
             }
         });
 
@@ -160,8 +163,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    const creatorId = req.nextUrl.searchParams.get("creatorId");
+    const spaceId = req.nextUrl.searchParams.get("spaceId");
     const session = await getServerSession();
+    const sessionUserId=await getServerSession(authOptions);
     const user = await prismaClient.user.findFirst({
         where: {
             email: session?.user?.email ?? ""
@@ -176,7 +180,7 @@ export async function GET(req: NextRequest) {
         })
     }
 
-    if (!creatorId) {
+    if (!spaceId) {
         return NextResponse.json({
             message: "Error"
         }, {
@@ -184,45 +188,62 @@ export async function GET(req: NextRequest) {
         })
     }
 
-    const [streams, activeStream] = await Promise.all([
-        prismaClient.stream.findMany({
+    const [space, activeStream] = await Promise.all([
+        prismaClient.space.findUnique({
             where: {
-                userId: creatorId,
-                played: false
+                id: spaceId,
+                hostId: session?.user.id
             },
             include: {
-                _count: {
-                    select: {
-                        upvotes: true
+                streams: {
+                    include: {
+                        _count: {
+                            select: {
+                                upvotes: true
+                            }
+                        },
+                        upvotes: {
+                            where: {
+                                userId: session?.user.id
+                            }
+                        }
+
+                    },
+                    where:{
+                        played:false
                     }
                 },
-                upvotes: {
-                    where: {
-                        userId: user.id
+                _count: {
+                    select: {
+                        streams: true
                     }
-                }
+                },                
+
             }
+            
         }),
         prismaClient.currentStream.findFirst({
             where: {
-                userId: creatorId
+                spaceId: spaceId
             },
             include: {
                 stream: true
             }
         })
     ]);
+    const hostId =space?.hostId;
+    const isCreator = sessionUserId?.user.id === hostId
 
-    const isCreator = user.id === creatorId;
 
     return NextResponse.json({
-        streams: streams.map(({_count, ...rest}) => ({
+        streams: space?.streams.map(({_count, ...rest}) => ({
             ...rest,
             upvotes: _count.upvotes,
             haveUpvoted: rest.upvotes.length ? true : false
         })),
         activeStream,
-        creatorId,
-        isCreator
+        hostId,
+        isCreator,
+        spaceName:space?.name
     });
 }

@@ -1,8 +1,11 @@
 import type { Config } from "tailwindcss"
+import {nextui} from "@nextui-org/react"
+const { violet, blackA, mauve, green } = require('@radix-ui/colors');
 
 const config = {
   darkMode: ["class"],
   content: [
+    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
@@ -52,6 +55,12 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+         
+        ...mauve,
+        ...violet,
+        ...green,
+        ...blackA,
+      
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -74,7 +83,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"),nextui()],
 } satisfies Config
 
 export default config

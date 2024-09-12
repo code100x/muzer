@@ -9,7 +9,7 @@ export default function useRedirect() {
 
     useEffect(() => {
         if (session.status === "authenticated") {
-            router.push("/dashboard")
+            router.push("/home")
         } else {
             router.push("/")
         }

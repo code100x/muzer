@@ -14,6 +14,7 @@ import YouTubePlayer from 'youtube-player'
 import { useSession } from "next-auth/react"
 import type { Session } from "next-auth"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { space } from 'postcss/lib/list'
 
 interface Video {
     id: string
@@ -27,6 +28,7 @@ interface Video {
     userId: string
     upvotes: number
     haveUpvoted: boolean
+    spaceId:string
 }
 
 interface CustomSession extends Omit<Session, 'user'> {
@@ -42,10 +44,12 @@ const REFRESH_INTERVAL_MS = 10 * 1000
 
 export default function StreamView({
     creatorId,
-    playVideo = false
+    playVideo = false,
+    spaceId
 }: {
     creatorId: string
     playVideo: boolean
+    spaceId:string
 }) {
     const [inputLink, setInputLink] = useState('')
     const [queue, setQueue] = useState<Video[]>([])
@@ -57,10 +61,12 @@ export default function StreamView({
     const [creatorUserId, setCreatorUserId] = useState<string | null>(null)
     const [isCreator, setIsCreator] = useState(false)
     const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false)
+    const [spaceName,setSpaceName]=useState("")
+    console.log(queue)
 
-    async function refreshStreams() {
+    async function refreshSpace() {
         try {
-            const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
+            const res = await fetch(`/api/streams/?spaceId=${spaceId}`, {
                 credentials: "include"
             })
             const json = await res.json()
@@ -82,6 +88,7 @@ export default function StreamView({
             // Set the creator's ID
             setCreatorUserId(json.creatorUserId)
             setIsCreator(json.isCreator)
+            setSpaceName(json.spaceName)
         } catch (error) {
             console.error("Error refreshing streams:", error)
             setQueue([])
@@ -90,10 +97,10 @@ export default function StreamView({
     }
 
     useEffect(() => {
-        refreshStreams()
-        const interval = setInterval(refreshStreams, REFRESH_INTERVAL_MS)
+        refreshSpace()
+        const interval = setInterval(refreshSpace, REFRESH_INTERVAL_MS)
         return () => clearInterval(interval)
-    }, [creatorId])
+    }, [spaceId])
 
     useEffect(() => {
         if (!videoPlayerRef.current || !currentVideo) return
@@ -126,14 +133,15 @@ export default function StreamView({
         }
         setLoading(true)
         try {
-            const res = await fetch("/api/streams/", {
+            const res = await fetch(`/api/streams/`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     creatorId,
-                    url: inputLink
+                    url: inputLink,
+                    spaceId:spaceId
                 })
             })
             const data = await res.json()
@@ -168,6 +176,7 @@ export default function StreamView({
         fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
             method: "POST",
             body: JSON.stringify({
+                spaceId:spaceId,
                 streamId: id
             })
         })
@@ -177,7 +186,7 @@ export default function StreamView({
         if (queue.length > 0) {
             try {
                 setPlayNextLoader(true)
-                const data = await fetch('/api/streams/next', {
+                const data = await fetch(`/api/streams/next?spaceId=${spaceId}`, {
                     method: "GET",
                 })
                 const json = await data.json()
@@ -192,7 +201,7 @@ export default function StreamView({
     }
 
     const handleShare = () => {
-        const shareableLink = `${window.location.origin}/creator/${creatorId}`
+        const shareableLink = `${window.location.origin}/creator/${creatorId}/${spaceId}`
         navigator.clipboard.writeText(shareableLink).then(() => {
             toast.success('Link copied to clipboard!')
         }, (err) => {
@@ -204,12 +213,18 @@ export default function StreamView({
     const emptyQueue = async () => {
         try {
             const res = await fetch("/api/streams/empty-queue", {
-                method: "POST"
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    spaceId:spaceId
+                })
             });
             const data = await res.json();
             if (res.ok) {
                 toast.success(data.message);
-                refreshStreams();
+                refreshSpace();
                 setIsEmptyQueueDialogOpen(false);
             } else {
                 toast.error(data.message || "Failed to empty queue");
@@ -222,12 +237,12 @@ export default function StreamView({
 
     const removeSong = async (streamId: string) => {
         try {
-            const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {
+            const res = await fetch(`/api/streams/remove?streamId=${streamId}&spaceId=${spaceId}`, {
                 method: "DELETE",
             })
             if (res.ok) {
                 toast.success("Song removed successfully")
-                refreshStreams()
+                refreshSpace()
             } else {
                 toast.error("Failed to remove song")
             }
@@ -239,6 +254,9 @@ export default function StreamView({
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-200">
             <Appbar />
+            <div className='mx-auto text-2xl bg-gradient-to-r rounded-lg from-indigo-600 to-violet-800 font-bold'>
+            {spaceName}
+            </div>
             <div className='flex justify-center px-4 py-8'>
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 w-full max-w-7xl">
                     <div className='lg:col-span-2 space-y-6'>

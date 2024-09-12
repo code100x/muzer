@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 //@ts-ignore
 import { Music } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 export function Appbar() {
     const session = useSession();
+    const router = useRouter();
 
     return <div className="flex justify-between px-20 pt-4">
-        <div className="text-lg font-bold flex flex-col justify-center text-white">
+        <div onClick={()=>{
+            router.push('/home')
+        }} className="text-lg font-bold flex flex-col justify-center hover:cursor-pointer text-white">
             Muzer
         </div>
         <div>

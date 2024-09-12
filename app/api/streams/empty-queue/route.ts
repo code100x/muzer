@@ -1,14 +1,15 @@
 import { prismaClient } from "@/app/lib/db";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(req:NextRequest) {
     const session = await getServerSession();
     const user = await prismaClient.user.findFirst({
         where: {
             email: session?.user?.email ?? ""
         }
     });
+    const data = await req.json()
 
     if (!user) {
         return NextResponse.json({
@@ -22,7 +23,8 @@ export async function POST() {
         await prismaClient.stream.updateMany({
             where: {
                 userId: user.id,
-                played: false
+                played: false,
+                spaceId:data.spaceId
             },
             data: {
                 played: true,
