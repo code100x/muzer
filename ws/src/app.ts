@@ -56,33 +56,58 @@ async function main() {
               RoomManager.getInstance().joinRoom(
                 decoded.creatorId,
                 decoded.userId,
-                ws
+                ws,
+                data.token
               );
             }
           }
         );
-      } else if (type === "cast-vote") {
-        await RoomManager.getInstance().castVote(
-          data.creatorId,
-          data.userId,
-          data.streamId,
-          data.vote
-        );
-      } else if (type === "add-to-queue") {
-        await RoomManager.getInstance().addToQueue(
-          data.creatorId,
-          data.userId,
-          data.url
-        );
-      } else if (type === "play-next") {
-        await RoomManager.getInstance().queue.add("play-next", {
-          creatorId: data.creatorId,
-          userId: data.userId,
-        });
-      } else if (type === "remove-song") {
-        await RoomManager.getInstance().queue.add("remove-song", data);
-      } else if (type === "empty-queue") {
-        await RoomManager.getInstance().queue.add("empty-queue", data);
+      } else {
+        const user = RoomManager.getInstance().users.get(data.userId);
+        // Adding this to verify the user who is sending this message is not mocking other user.
+        if (user && data.token === user?.token) {
+          data.userId = user.userId;
+          if (type === "cast-vote") {
+            await RoomManager.getInstance().castVote(
+              data.creatorId,
+              data.userId,
+              data.streamId,
+              data.vote
+            );
+          } else if (type === "add-to-queue") {
+            await RoomManager.getInstance().addToQueue(
+              data.creatorId,
+              data.userId,
+              data.url
+            );
+          } else if (type === "play-next") {
+            await RoomManager.getInstance().queue.add("play-next", {
+              creatorId: data.userId,
+              userId: data.userId,
+            });
+          } else if (type === "remove-song") {
+            await RoomManager.getInstance().queue.add("remove-song", {
+              ...data,
+              creatorId: data.userId,
+              userId: data.userId,
+            });
+          } else if (type === "empty-queue") {
+            await RoomManager.getInstance().queue.add("empty-queue", {
+              ...data,
+              creatorId: data.userId,
+              userId: data.userId,
+            });
+          }
+        } else {
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              data: {
+                message: "You are unauthorized to perform this action",
+              },
+            })
+          );
+        }
       }
     });
 
