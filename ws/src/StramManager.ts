@@ -1,12 +1,12 @@
 import { WebSocket } from "ws";
 import { createClient, RedisClientType } from "redis";
-import { PrismaClient } from "@prisma/client";
 //@ts-ignore
 import youtubesearchapi from "youtube-search-api";
 import { Job, Queue, Worker } from "bullmq";
+import { PrismaClient } from "@prisma/client";
 
-const TIME_SPAN_FOR_VOTE = 1200000 / 40; // 20min
-const TIME_SPAN_FOR_QUEUE = 1200000 / 40; // 20min
+const TIME_SPAN_FOR_VOTE = 1200000; // 20min
+const TIME_SPAN_FOR_QUEUE = 1200000; // 20min
 const TIME_SPAN_FOR_REPEAT = 3600000;
 const MAX_QUEUE_LENGTH = 20;
 
@@ -91,9 +91,6 @@ export class RoomManager {
     await this.redisClient.connect();
     await this.subscriber.connect();
     await this.publisher.connect();
-    this.worker.on("error", () => {
-      console.log("Worker  ready");
-    });
   }
 
   onSubscribeRoom(message: string, creatorId: string) {
@@ -141,14 +138,20 @@ export class RoomManager {
     }
   }
 
-  async addUser(userId: string, ws: WebSocket) {
+  async addUser(userId: string, ws: WebSocket, token: string) {
     this.users.set(userId, {
       userId,
       ws,
+      token,
     });
   }
 
-  async joinRoom(creatorId: string, userId: string, ws: WebSocket) {
+  async joinRoom(
+    creatorId: string,
+    userId: string,
+    ws: WebSocket,
+    token: string
+  ) {
     let room = this.rooms.get(creatorId);
     let user = this.users.get(userId);
 
@@ -158,7 +161,7 @@ export class RoomManager {
     }
 
     if (!user) {
-      await this.addUser(userId, ws);
+      await this.addUser(userId, ws, token);
       user = this.users.get(userId);
     }
 
@@ -645,6 +648,7 @@ export class RoomManager {
 type User = {
   userId: string;
   ws: WebSocket;
+  token: string;
 };
 
 type Room = {
