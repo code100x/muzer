@@ -9,7 +9,7 @@ export function Appbar() {
   const buttonTitle = isUserLoggedIn ? "Logout" : "Login";
 
   const handleButtonClick = () => {
-    session.data?.user
+    isUserLoggedIn
       ? signOut({ callbackUrl: "/" })
       : signIn("google", { callbackUrl: "/dashboard" });
   };
