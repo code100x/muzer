@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@prisma/client':
-    specifier: ^5.19.1
+    specifier: 5.19.1
     version: 5.19.1(prisma@5.19.1)
   axios:
     specifier: ^1.7.7
@@ -37,7 +37,7 @@ dependencies:
     version: 5.0.10
   ws:
     specifier: ^8.18.0
-    version: 8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    version: 8.18.0
   youtube-search-api:
     specifier: ^1.2.2
     version: 1.2.2
@@ -887,7 +887,7 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10):
+  /ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
@@ -898,9 +898,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dependencies:
-      bufferutil: 4.0.8
-      utf-8-validate: 5.0.10
     dev: false
 
   /yallist@4.0.0:
