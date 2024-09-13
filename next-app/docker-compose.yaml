@@ -20,7 +20,9 @@ services:
             - node_modules/
         - action: rebuild
           path: package.json
-
+          target: /usr/src/app
+          ignore:
+            - node_modules/
   postgres:
     container_name: prisma-postgres
     image: postgres:alpine
@@ -51,3 +53,4 @@ services:
 volumes:
   postgres-data:
     external: false
+ 
