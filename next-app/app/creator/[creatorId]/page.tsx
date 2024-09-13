@@ -5,6 +5,8 @@ import { useSocket } from "@/context/socket-context";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import jwt from "jsonwebtoken";
+import ErrorScreen from "@/components/ErrorScreen";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Creator({
   params: { creatorId },
@@ -13,18 +15,17 @@ export default function Creator({
     creatorId: string;
   };
 }) {
-  const { socket, user } = useSocket();
-  const session = useSession();
+  const { socket, user, connectionError, loading, setUser } = useSocket();
   useRedirect();
 
   useEffect(() => {
-    if (user) {
+    if (user && !user.token) {
       const token = jwt.sign(
         {
           creatorId: creatorId,
           userId: user.id,
         },
-        process.env.NEXT_PUBLIC_SECRET ?? "secret",
+        process.env.NEXT_PUBLIC_SECRET ?? "secret"
       );
 
       socket?.send(
@@ -33,14 +34,25 @@ export default function Creator({
           data: {
             token,
           },
-        }),
+        })
       );
+
+      setUser({ ...user, token });
     }
   }, [user]);
 
-  if (!session.data) {
-    return <h1>Please Log in....</h1>;
+  if (connectionError) {
+    return <ErrorScreen>Cannot connect to socket server</ErrorScreen>;
   }
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <ErrorScreen>Please Log in....</ErrorScreen>;
+  }
+
   return <StreamView creatorId={creatorId} playVideo={false} />;
 }
 

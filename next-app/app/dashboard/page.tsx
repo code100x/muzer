@@ -4,13 +4,15 @@ import { useSocket } from "@/context/socket-context";
 import useRedirect from "../../hooks/useRedirect";
 import jwt from "jsonwebtoken";
 import StreamView from "../../components/StreamView";
+import ErrorScreen from "@/components/ErrorScreen";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Component() {
-  const { socket, user, connectionError } = useSocket();
+  const { socket, user, loading, setUser, connectionError } = useSocket();
   useRedirect();
 
   useEffect(() => {
-    if (user) {
+    if (user && !user.token) {
       const token = jwt.sign(
         {
           creatorId: user?.id,
@@ -19,7 +21,7 @@ export default function Component() {
         process.env.NEXT_PUBLIC_SECRET || "",
         {
           expiresIn: "24h",
-        },
+        }
       );
 
       socket?.send(
@@ -28,17 +30,22 @@ export default function Component() {
           data: {
             token,
           },
-        }),
+        })
       );
+      setUser({ ...user, token });
     }
   }, [user]);
 
   if (connectionError) {
-    return <h1>Cannot connect to socket server</h1>;
+    return <ErrorScreen>Cannot connect to socket server</ErrorScreen>;
+  }
+
+  if (loading) {
+    return <LoadingScreen />;
   }
 
   if (!user) {
-    return <h1>Please Log in....</h1>;
+    return <ErrorScreen>Please Log in....</ErrorScreen>;
   }
 
   return <StreamView creatorId={user.id} playVideo={true} />;
