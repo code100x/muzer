@@ -37,15 +37,12 @@ dependencies:
     version: 5.0.10
   ws:
     specifier: ^8.18.0
-    version: 8.18.0
+    version: 8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
   youtube-search-api:
     specifier: ^1.2.2
     version: 1.2.2
 
 devDependencies:
-  '@types/dotenv':
-    specifier: ^8.2.0
-    version: 8.2.0
   '@types/jsonwebtoken':
     specifier: ^9.0.6
     version: 9.0.6
@@ -58,6 +55,9 @@ devDependencies:
   ts-node:
     specifier: ^10.9.2
     version: 10.9.2(@types/node@22.5.4)(typescript@5.6.2)
+  typescript:
+    specifier: ^5.6.2
+    version: 5.6.2
 
 packages:
 
@@ -244,13 +244,6 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
-    dev: true
-
-  /@types/dotenv@8.2.0:
-    resolution: {integrity: sha512-ylSC9GhfRH7m1EUXBXofhgx4lUWmFeQDINW5oLuS+gxWdfUeW4zJdeVTYVkexEW+e2VUvlZR2kGnGGipAWR7kw==}
-    deprecated: This is a stub types definition. dotenv provides its own type definitions, so you do not need this installed.
-    dependencies:
-      dotenv: 16.4.5
     dev: true
 
   /@types/jsonwebtoken@9.0.6:
@@ -454,6 +447,7 @@ packages:
   /dotenv@16.4.5:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
+    dev: false
 
   /ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
@@ -887,7 +881,7 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /ws@8.18.0:
+  /ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10):
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
@@ -898,6 +892,9 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dependencies:
+      bufferutil: 4.0.8
+      utf-8-validate: 5.0.10
     dev: false
 
   /yallist@4.0.0:
