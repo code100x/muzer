@@ -1,11 +1,13 @@
 "use client";
 import { useEffect } from "react";
 import { useSocket } from "@/context/socket-context";
-import useRedirect from "../../hooks/useRedirect";
+import useRedirect from "../../../hooks/useRedirect";
 import jwt from "jsonwebtoken";
-import StreamView from "../../components/StreamView";
+import OldStreamView from "../../../components/OldStreamView";
+import StreamView from "../../../components/StreamView";
+import { useSession } from "next-auth/react";
 
-export default function Component() {
+export default function Component({params}:{params:{spaceId:string}}) {
   const { socket, user, connectionError } = useSocket();
   useRedirect();
 
@@ -41,7 +43,20 @@ export default function Component() {
     return <h1>Please Log in....</h1>;
   }
 
+// ------------- If using oldstream view
+  // const session = useSession(); 
+ 
+  // if (session.status === "loading") {
+  //     return <div>Loading...</div>;
+  // }
+
+  // if (!session.data?.user.id) {
+  //     return <h1>Please Log in....</h1>;
+  // }
+
+  // return <OldStreamView creatorId={session.data.user.id} spaceId={params.spaceId} playVideo={true} />;
   return <StreamView creatorId={user.id} playVideo={true} />;
+  
 }
 
 export const dynamic = "auto";

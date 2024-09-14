@@ -1,13 +1,17 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export function Appbar() {
   const session = useSession();
+  const router= useRouter();
 
   return (
     <div className="flex justify-between px-5 md:px-10 xl:px-20 py-4">
-      <div className="text-lg font-bold flex flex-col justify-center text-white">
+      <div /*onClick={()=>{
+        router.push('/home') // If using oldstream view this goes to home where you can see all the spaces
+      }} */ className="text-lg font-bold flex flex-col hover:cursor-pointer justify-center text-white">
         Muzer
       </div>
       <div>

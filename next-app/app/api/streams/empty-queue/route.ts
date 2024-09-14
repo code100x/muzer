@@ -1,9 +1,9 @@
 import { authOptions } from "@/lib/auth-options";
 import db from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(req:NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -17,12 +17,14 @@ export async function POST() {
     );
   }
   const user = session.user;
+  const data = await req.json()
 
   try {
     await db.stream.updateMany({
       where: {
         userId: user.id,
         played: false,
+        spaceId:data.spaceId
       },
       data: {
         played: true,
