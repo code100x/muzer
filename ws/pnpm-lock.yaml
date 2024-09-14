@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@prisma/client':
-        specifier: ^5.19.1
+        specifier: 5.19.1
         version: 5.19.1(prisma@5.19.1)
       axios:
         specifier: ^1.7.7
