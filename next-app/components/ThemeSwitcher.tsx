@@ -16,15 +16,15 @@ export function ThemeSwitcher() {
 
   if (!isMounted) return null;
 
-
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
   };
 
   return (
     <Button
+      className="hover:bg-transparent"
       onClick={toggleTheme}
-      className="items-center bg-transparent text-white hover:bg-transparent"
+      variant="ghost"
     >
       {isDark ? <Sun /> : <Moon />}
     </Button>

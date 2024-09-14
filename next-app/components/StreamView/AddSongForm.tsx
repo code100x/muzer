@@ -46,8 +46,8 @@ export default function AddSongForm({
 
   return (
     <>
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-white">Add a song</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">Add a song</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -56,20 +56,19 @@ export default function AddSongForm({
           placeholder="Please paste your link"
           value={inputLink}
           onChange={(e) => setInputLink(e.target.value)}
-          className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
         />
         <Button
           disabled={loading}
           onClick={handleSubmit}
           type="submit"
-          className="w-full bg-purple-700 hover:bg-purple-800 text-white"
+          className="w-full"
         >
           {loading ? "Loading..." : "Add to Queue"}
         </Button>
       </form>
 
       {videoId && !loading && (
-        <Card className="bg-gray-900 border-gray-800">
+        <Card>
           <CardContent className="p-4">
             <LiteYouTubeEmbed title="" id={videoId} />
           </CardContent>

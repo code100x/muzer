@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
@@ -46,8 +46,8 @@ export default function NowPlaying({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-      <Card className="bg-gray-900 border-gray-800">
+      <h2 className="text-2xl font-bold">Now Playing</h2>
+      <Card>
         <CardContent className="p-4">
           {currentVideo ? (
             <div>
@@ -61,25 +61,21 @@ export default function NowPlaying({
                   <img
                     alt={currentVideo.bigImg}
                     src={currentVideo.bigImg}
-                    className="w-full h-72 object-cover rounded"
+                    className="h-72 w-full rounded object-cover"
                   />
-                  <p className="mt-2 text-center font-semibold text-white">
+                  <p className="mt-2 text-center font-semibold">
                     {currentVideo.title}
                   </p>
                 </>
               )}
             </div>
           ) : (
-            <p className="text-center py-8 text-gray-400">No video playing</p>
+            <p className="py-8 text-center">No video playing</p>
           )}
         </CardContent>
       </Card>
       {playVideo && (
-        <Button
-          disabled={playNextLoader}
-          onClick={playNext}
-          className="w-full bg-purple-700 hover:bg-purple-800 text-white"
-        >
+        <Button disabled={playNextLoader} onClick={playNext} className="w-full">
           <Play className="mr-2 h-4 w-4" />{" "}
           {playNextLoader ? "Loading..." : "Play next"}
         </Button>
