@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "prisma generate",
     "dev": "nodemon src/app.ts",
     "start": "node dist/app.js",
     "build": "prisma generate && npx tsc -b",
@@ -14,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.19.1",
+    "@prisma/client": "5.19.1",
     "axios": "^1.7.7",
     "bullmq": "^5.12.14",
     "cors": "^2.8.5",
