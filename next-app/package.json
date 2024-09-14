@@ -10,9 +10,8 @@
     "lint": "next lint",
     "prisma:studio": "npx prisma studio",
     "postinstall": "prisma generate",
-    "prisma:migrate": "prisma migrate dev deploy",
-    "prisma:docker": "pnpm prisma:migrate && pnpm postinstall",
-    "dev:docker": "pnpm prisma:docker && pnpm dev",
+    "prisma:migrate": "prisma migrate",
+    "dev:docker": "pnpm prisma:migrate && pnpm dev",
     "format:fix": "prettier --write \"**/*.{ts,tsx,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json}\""
   },
