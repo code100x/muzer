@@ -69,8 +69,6 @@ model Space {
   streams        Stream[]     @relation("spaceStreams")
   hostId        String
   host          User        @relation("hostedBy", fields: [hostId], references: [id])
-  startTime     DateTime    @default(now())
-  endTime       DateTime?
   isActive      Boolean     @default(true)
   currentStream CurrentStream?
 }

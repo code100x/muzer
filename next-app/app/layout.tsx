@@ -2,10 +2,19 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
-import {NextUIProvider} from "@nextui-org/react";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast, ToastContainerProps, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const globalToastOptions: ToastContainerProps = {
+  position: "top-right",
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  theme: "light",
+  transition: Bounce,
+};
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -21,8 +30,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-      <ToastContainer/>
-        <Providers><NextUIProvider>{children}</NextUIProvider></Providers>
+      <ToastContainer {...globalToastOptions}/>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

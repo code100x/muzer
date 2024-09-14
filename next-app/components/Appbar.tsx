@@ -9,9 +9,9 @@ export function Appbar() {
 
   return (
     <div className="flex justify-between px-5 md:px-10 xl:px-20 py-4">
-      <div /*onClick={()=>{
+      <div onClick={()=>{
         router.push('/home') // If using oldstream view this goes to home where you can see all the spaces
-      }} */ className="text-lg font-bold flex flex-col hover:cursor-pointer justify-center text-white">
+      }}  className="text-lg font-bold flex flex-col hover:cursor-pointer justify-center text-white">
         Muzer
       </div>
       <div>
@@ -26,7 +26,7 @@ export function Appbar() {
         {!session.data?.user && (
           <Button
             className="bg-purple-600 text-white hover:bg-purple-700"
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("google", { callbackUrl: "/home" })}// Use /dashboard for web socket version
           >
             Signin
           </Button>

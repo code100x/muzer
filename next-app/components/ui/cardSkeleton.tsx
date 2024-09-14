@@ -1,22 +1,14 @@
-import { Skeleton, Card, CardBody } from "@nextui-org/react";
+import { Skeleton } from "@/components/ui/skeleton"
 import React from "react";
 
 export default function CardSkeleton() {
   return (
-    <Card className="py-4 dark h-[500px] w-full sm:w-[450px] lg:w-[500px] mx-auto" radius="lg">
-      <CardBody className="overflow-visible flex justify-center items-center py-2">
-        <Skeleton className="w-[28rem] h-[16rem] rounded-xl bg-default-200">
-          <div className="w-[28rem] h-[16rem] rounded-xl bg-default-200"></div>
-        </Skeleton>
-        <div className="flex justify-between space-x-6 mt-10">
-          <Skeleton className="w-[120px] h-[40px] rounded-lg bg-default-300">
-            <div className="w-[120px] h-[40px] rounded-lg bg-default-300"></div>
-          </Skeleton>
-          <Skeleton className="w-[120px] h-[40px] rounded-lg bg-default-300">
-            <div className="w-[120px] h-[40px] rounded-lg bg-default-300"></div>
-          </Skeleton>
-        </div>
-      </CardBody>
-    </Card>
+    <div className="flex flex-col space-y-3">
+    <Skeleton className="h-[450px] w-[500px] rounded-3xl" />
+    <div className="space-x-5 flex justify-center">
+      <Skeleton className="h-[40px] w-[110px]" />
+      <Skeleton className="h-[40px] w-[152px]" />
+    </div>
+  </div>
   );
 }

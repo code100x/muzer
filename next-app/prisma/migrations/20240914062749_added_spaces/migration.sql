@@ -20,8 +20,6 @@ CREATE TABLE "Space" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "hostId" TEXT NOT NULL,
-    "startTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "endTime" TIMESTAMP(3),
     "isActive" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "Space_pkey" PRIMARY KEY ("id")

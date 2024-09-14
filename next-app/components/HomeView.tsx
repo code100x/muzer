@@ -1,7 +1,7 @@
 "use client";
 import { Bounce, toast } from "react-toastify";
 import { Appbar } from "../components/Appbar";
-import { Card, CardHeader, CardBody, Image } from "@nextui-org/react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,11 +12,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
-import createSpace from "@/actions/createSpace";
-import { getSpaces } from "@/actions/getSpaces";
 import { useRouter } from "next/navigation";
 import CardSkeleton from "./ui/cardSkeleton";
-import { deleteSpaces } from "@/actions/deleteSpace";
+
 
 interface Space {
   endTime?: Date | null;
@@ -37,25 +35,23 @@ export default function HomeView() {
     const fetchSpaces = async () => {
       setIsLoading(true);
       try {
-        const response = await getSpaces();
-        const fetchedSpaces: Space[] | null = response.spaces ?? null;
-        if (response.success) {
-          setSpaces(fetchedSpaces);
-        }
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        toast.error("Error fetching spaces", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        const response = await fetch('/api/spaces', {
+          method: 'GET',
         });
+        
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch spaces");
+        }
+         const fetchedSpaces: Space[] = data.spaces;
+         setSpaces(fetchedSpaces);
+
+      } catch (error) {
+        toast.error("Error fetching spaces");
+      }
+      finally {
+        setIsLoading(false);
       }
     };
     fetchSpaces();
@@ -63,75 +59,55 @@ export default function HomeView() {
 
   const handleCreateSpace = async () => {
     setIsCreateSpaceOpen(false);
-    const response = await createSpace(spaceName);
-    const newSpace: Space = response.space!;
+    try {
+      const response = await fetch(`/api/spaces`,{
+        method:"POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            spaceName:spaceName
+        }),
+      })
+      const data = await response.json();
 
-    console.log(response);
-    if (response.success) {
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to create space");
+      }
+      const newSpace=data.space;
       setSpaces((prev) => {
-        // Return a new array with the new space added
+        
         const updatedSpaces: Space[] = prev ? [...prev, newSpace] : [newSpace];
         return updatedSpaces;
       });
-      toast.success(response.message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
-    } else {
-      toast.error(response.message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.success(data.message);
+
+    } catch (error:any) {
+      toast.error(error.message || "Error Creating Space");
     }
+    
   };
 
   const handleDeleteSpace=async(spaceId:string)=>{
-    const response = await deleteSpaces(spaceId);
+    try {
+      const response = await fetch(`/api/spaces/?spaceId=${spaceId}`,{
+        method:"DELETE",
+      })
+      const data = await response.json();
 
-    if (response.success) {
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to delete space");
+      }
       setSpaces((prev) => {
-        // Return a new array with the new space added
+        
         const updatedSpaces: Space[] = prev ? prev.filter(space => space.id !== spaceId) : [];
         return updatedSpaces;
       });
-      toast.success(response.message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
-    } else {
-      toast.error(response.message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.success(data.message);
+    } catch (error:any) {
+      toast.error(error.message || "Error Deleting Space");
     }
+   
   }
 
   return (
@@ -149,25 +125,24 @@ export default function HomeView() {
         </Button>
 
         <div className="grid gap-8 grid-cols-1 mt-20 md:grid-cols-2 p-4">
-          {loading && <CardSkeleton />}
-          {loading && <CardSkeleton />}
-          {loading && <CardSkeleton />}
-          {loading && <CardSkeleton />}
+          {loading && <div className="py-4 dark  h-[500px] w-full sm:w-[450px] lg:w-[500px] mx-auto"> <CardSkeleton /></div>}
+          {loading && <div className="py-4 dark  h-[500px] w-full sm:w-[450px] lg:w-[500px] mx-auto"> <CardSkeleton /></div>}
+          
           {!loading &&
             spaces &&
             spaces.map((space) => {
               return (
                 <Card
                   key={space.id}
-                  className="py-4 dark  h-[500px] w-full sm:w-[450px] lg:w-[500px] mx-auto"
+                  className="py-4 bg-[#18181b] h-[500px] w-full sm:w-[450px] lg:w-[500px] border-0 rounded-3xl mx-auto"
                 >
-                  <CardHeader className="pb-0 pt-2 px-4 flex-col justify-center items-center ">
+                  <CardHeader className="pb-0 pt-2 px-4 flex-col text-white justify-center items-center ">
                     <div className=" text-4xl font-bold">{space.name}</div>
                   </CardHeader>
-                  <CardBody className="overflow-visible flex justify-center  items-center  py-2">
-                    <Image
+                  <CardContent className="overflow-visible flex flex-col justify-center  items-center  py-2">
+                    <img
                       alt="Card background"
-                      className="object-cover w-[28rem]   rounded-xl"
+                      className="object-cover w-[28rem]   rounded-3xl"
                       src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     />
                     <div className="flex justify-between space-x-6">
@@ -186,7 +161,7 @@ export default function HomeView() {
                         Delete This Space
                       </Button>
                     </div>
-                  </CardBody>
+                  </CardContent>
                 </Card>
               );
             })}
