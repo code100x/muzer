@@ -93,19 +93,16 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
     <>
       <div className="col-span-3">
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-            <h2 className="text-3xl font-bold text-white">Upcoming Songs</h2>
+          <div className="flex flex-col items-start justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
+            <h2 className="text-3xl font-bold">Upcoming Songs</h2>
             <div className="flex space-x-2">
-              <Button
-                onClick={handleShare}
-                className="bg-purple-700 hover:bg-purple-800 text-white"
-              >
+              <Button onClick={handleShare}>
                 <Share2 className="mr-2 h-4 w-4" /> Share
               </Button>
               {isCreator && (
                 <Button
                   onClick={() => setIsEmptyQueueDialogOpen(true)}
-                  className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+                  variant="secondary"
                 >
                   <Trash2 className="mr-2 h-4 w-4" /> Empty Queue
                 </Button>
@@ -113,32 +110,30 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
             </div>
           </div>
           {queue.length === 0 && (
-            <Card className="bg-gray-900 border-gray-800 w-full">
+            <Card className="w-full">
               <CardContent className="p-4">
-                <p className="text-center py-8 text-gray-400">
-                  No videos in queue
-                </p>
+                <p className="py-8 text-center">No videos in queue</p>
               </CardContent>
             </Card>
           )}
           {queue.map((video) => (
-            <Card key={video.id} className="bg-gray-900 border-gray-800">
-              <CardContent className="p-4 flex items-center space-x-4">
+            <Card key={video.id} className="">
+              <CardContent className="flex items-center space-x-4 p-4">
                 <img
                   src={video.smallImg}
                   alt={`Thumbnail for ${video.title}`}
-                  className="w-30 h-20 object-cover rounded"
+                  className="w-30 h-20 rounded object-cover"
                 />
                 <div className="flex-grow">
-                  <h3 className="font-semibold text-white">{video.title}</h3>
-                  <div className="flex items-center space-x-2 mt-2">
+                  <h3 className="font-semibold">{video.title}</h3>
+                  <div className="mt-2 flex items-center space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() =>
                         handleVote(video.id, video.haveUpvoted ? false : true)
                       }
-                      className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                      className="flex items-center space-x-1"
                     >
                       {video.haveUpvoted ? (
                         <ChevronDown className="h-4 w-4" />
@@ -152,7 +147,6 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
                         variant="outline"
                         size="sm"
                         onClick={() => removeSong(video.id)}
-                        className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -183,10 +177,7 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
             >
               Cancel
             </Button>
-            <Button
-              onClick={emptyQueue}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
+            <Button onClick={emptyQueue} variant="destructive">
               Empty Queue
             </Button>
           </DialogFooter>

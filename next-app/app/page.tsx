@@ -14,13 +14,13 @@ export default async function LandingPage() {
    if (session?.user.id) redirect("/home"); // If using old stream view then use this
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <Appbar />
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+      <Appbar showThemeSwitch={false} />
       <main className="flex-1 py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
+              <h1 className="text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-5xl lg:text-6xl/none">
                 Let Your Fans Choose the Beat
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-400 md:text-xl">
@@ -32,19 +32,16 @@ export default async function LandingPage() {
               <Button className="bg-purple-600 text-white hover:bg-purple-700">
                 <Link href="/signin">Get Started</Link>
               </Button>
-              <Button
-                variant="outline"
-                className="text-purple-400 border-purple-400 hover:bg-purple-400 hover:text-gray-900"
-              >
+              <Button className="bg-white text-purple-400 hover:bg-white/90">
                 Learn More
               </Button>
             </div>
           </div>
         </div>
       </main>
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-800 bg-opacity-50">
+      <section className="w-full bg-gray-800 bg-opacity-50 py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
-          <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl text-center mb-8 text-white">
+          <h2 className="mb-8 text-center text-2xl font-bold tracking-tighter text-white sm:text-3xl">
             Key Features
           </h2>
           <div className="grid gap-8 sm:grid-cols-3">
@@ -72,7 +69,7 @@ export default async function LandingPage() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl text-white">
+              <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-4xl">
                 Ready to Transform Your Streams?
               </h2>
               <p className="mx-auto max-w-[600px] text-gray-400 md:text-xl">
@@ -83,7 +80,7 @@ export default async function LandingPage() {
             <div className="w-full max-w-sm space-y-2">
               <form className="flex space-x-2">
                 <Input
-                  className="max-w-lg flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                  className="max-w-lg flex-1 border-gray-700 bg-gray-800 text-white placeholder-gray-500"
                   placeholder="Enter your email"
                   type="email"
                 />
@@ -98,19 +95,19 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-700">
+      <footer className="flex w-full shrink-0 flex-col items-center gap-2 border-t border-gray-700 px-4 py-6 sm:flex-row md:px-6">
         <p className="text-xs text-gray-400">
           © 2023 MusicStreamChoice. All rights reserved.
         </p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+        <nav className="flex gap-4 sm:ml-auto sm:gap-6">
           <Link
-            className="text-xs text-gray-400 hover:text-purple-400 transition-colors"
+            className="text-xs text-gray-400 transition-colors hover:text-purple-400"
             href="#"
           >
             Terms of Service
           </Link>
           <Link
-            className="text-xs text-gray-400 hover:text-purple-400 transition-colors"
+            className="text-xs text-gray-400 transition-colors hover:text-purple-400"
             href="#"
           >
             Privacy

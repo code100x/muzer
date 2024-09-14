@@ -1,0 +1,59 @@
+# Stage 1: Install dependencies
+FROM node:22-alpine AS installer
+
+WORKDIR /usr/src/app
+RUN apk add --no-cache libc6-compat
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+
+RUN \
+    if [ -f pnpm-lock.yaml ]; then \
+    corepack enable pnpm && pnpm install --frozen-lockfile --ignore-scripts; \
+    else \
+    echo "pnpm-lock.yaml not found" && exit 1; \
+    fi
+
+# Stage 2: Build stage
+FROM node:22-alpine AS builder
+WORKDIR /usr/src/app
+
+COPY --from=installer /usr/src/app/node_modules ./node_modules
+COPY --from=installer /usr/src/app/prisma ./prisma
+
+RUN DATABASE_URL=$DATABASE_URL npx prisma generate
+
+COPY . .
+
+RUN \
+    if [ -f pnpm-lock.yaml ]; then \
+    corepack enable pnpm && pnpm run build; \
+    else \
+    echo "pnpm-lock.yaml not found" && exit 1; \
+    fi
+
+# Stage 3: Run stage 
+FROM node:22-alpine AS runner
+WORKDIR /usr/src/app
+
+ENV NODE_ENV production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder usr/src/app/public ./public
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+COPY --from=builder --chown=nextjs:nodejs  usr/src/app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs usr/src/app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+# For Standalone build
+ENV PORT 3000 
+ENV HOSTNAME "0.0.0.0"
+
+CMD [ "node", "server.js" ]

@@ -13,10 +13,10 @@ import { signIn } from "next-auth/react";
 
 const SignInComponent = () => {
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <Card className="w-[90%] sm:w-[400px] bg-gradient-to-br from-white via-gray-200 to-white shadow-2xl shadow-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+      <Card className="w-[90%] bg-gradient-to-br from-white via-gray-200 to-white shadow-2xl shadow-slate-900 sm:w-[400px]">
         <CardHeader>
-          <CardTitle className="text-center pb-1 text-[30px] font-bold">
+          <CardTitle className="pb-1 text-center text-[30px] font-bold text-black">
             Sign in
           </CardTitle>
           <CardDescription className="text-center text-[14px]">
@@ -26,7 +26,7 @@ const SignInComponent = () => {
         <CardContent>
           <div className="flex flex-col gap-2">
             <Button
-              className="w-full flex gap-2 rounded-xl font-semibold text-[14px]"
+              className="gap-2 font-semibold"
               variant="outline"
               onClick={async () => {
                 await signIn("google", { callbackUrl: "/home" }); // use /dashboard for websocket
