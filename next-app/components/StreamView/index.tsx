@@ -121,10 +121,10 @@ export default function StreamView({
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
+    <div className="flex min-h-screen flex-col">
       <Appbar />
       <div className="flex justify-center">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
+        <div className="grid w-screen max-w-screen-xl grid-cols-1 gap-4 pt-8 md:grid-cols-5">
           <Queue
             creatorId={creatorId}
             isCreator={playVideo}
@@ -132,7 +132,7 @@ export default function StreamView({
             userId={user?.id || ""}
           />
           <div className="col-span-2">
-            <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
+            <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
               <AddSongForm
                 creatorId={creatorId}
                 userId={user?.id || ""}
