@@ -10,7 +10,8 @@ import { redirect } from "next/navigation";
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions);
-  if (session?.user.id) redirect("/dashboard");
+  // if (session?.user.id) redirect("/dashboard");
+   if (session?.user.id) redirect("/home"); // If using old stream view then use this
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
