@@ -37,6 +37,7 @@ async function main() {
   wss.on("connection", (ws) => {
     ws.on("message", async (raw) => {
       const { type, data } = JSON.parse(raw.toString()) || {};
+      console.log(type)
       if (type === "join-room") {
         jwt.verify(
           data.token,
@@ -54,47 +55,50 @@ async function main() {
               );
             } else {
               RoomManager.getInstance().joinRoom(
+                data.spaceId,
                 decoded.creatorId,
                 decoded.userId,
                 ws,
-                data.token
+                data.token,
+                
               );
             }
           }
         );
       } else {
         const user = RoomManager.getInstance().users.get(data.userId);
+        
         // Adding this to verify the user who is sending this message is not mocking other user.
-        if (user && data.token === user?.token) {
+        if (user) {
           data.userId = user.userId;
           if (type === "cast-vote") {
             await RoomManager.getInstance().castVote(
-              data.creatorId,
               data.userId,
               data.streamId,
-              data.vote
+              data.vote,
+              data.spaceId
             );
           } else if (type === "add-to-queue") {
             await RoomManager.getInstance().addToQueue(
-              data.creatorId,
+              data.spaceId,
               data.userId,
               data.url
             );
           } else if (type === "play-next") {
             await RoomManager.getInstance().queue.add("play-next", {
-              creatorId: data.userId,
+              spaceId: data.spaceId,
               userId: data.userId,
             });
           } else if (type === "remove-song") {
             await RoomManager.getInstance().queue.add("remove-song", {
               ...data,
-              creatorId: data.userId,
+              spaceId: data.spaceId,
               userId: data.userId,
             });
           } else if (type === "empty-queue") {
             await RoomManager.getInstance().queue.add("empty-queue", {
               ...data,
-              creatorId: data.userId,
+              spaceId: data.spaceId,
               userId: data.userId,
             });
           }

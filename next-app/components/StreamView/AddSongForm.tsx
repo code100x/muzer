@@ -14,6 +14,7 @@ type Props = {
   setInputLink: (value: string) => void;
   loading: boolean;
   enqueueToast: (type: "error" | "success", message: string) => void;
+  spaceId:string
 };
 
 export default function AddSongForm({
@@ -24,6 +25,7 @@ export default function AddSongForm({
   setLoading,
   creatorId,
   userId,
+  spaceId
 }: Props) {
   const { sendMessage } = useSocket();
 
@@ -31,8 +33,9 @@ export default function AddSongForm({
     e.preventDefault();
     if (inputLink.match(YT_REGEX)) {
       setLoading(true);
+      
       sendMessage("add-to-queue", {
-        creatorId,
+        spaceId,
         userId,
         url: inputLink,
       });

@@ -18,9 +18,10 @@ type Props = {
   creatorId: string;
   userId: string;
   isCreator: boolean;
+  spaceId:string
 };
 
-export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
+export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: Props) {
   const { sendMessage } = useSocket();
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
 
@@ -30,11 +31,12 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
       streamId: id,
       userId,
       creatorId,
+      spaceId
     });
   }
 
   const handleShare = () => {
-    const shareableLink = `${window.location.origin}/creator/${creatorId}`;
+    const shareableLink = `${window.location.origin}/spaces/${spaceId}`;
     navigator.clipboard.writeText(shareableLink).then(
       () => {
         toast.success("Link copied to clipboard!");
@@ -48,7 +50,7 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
 
   const emptyQueue = async () => {
     sendMessage("empty-queue", {
-      creatorId: userId,
+      spaceId:spaceId,
     });
     setIsEmptyQueueDialogOpen(false);
     // try {
@@ -72,7 +74,7 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
     sendMessage("remove-song", {
       streamId,
       userId,
-      creatorId,
+      spaceId,
     });
     // try {
     //   const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {

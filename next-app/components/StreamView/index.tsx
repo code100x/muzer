@@ -15,15 +15,19 @@ import { Appbar } from "../Appbar";
 export default function StreamView({
   creatorId,
   playVideo = false,
+  spaceId
 }: {
   creatorId: string;
   playVideo: boolean;
+  spaceId:string;
 }) {
   const [inputLink, setInputLink] = useState("");
   const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
+  const [spaceName,setSpaceName]=useState("")
+
 
   const { socket, sendMessage } = useSocket();
   const user = useSession().data?.user;
@@ -80,7 +84,7 @@ export default function StreamView({
 
   async function refreshStreams() {
     try {
-      const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
+      const res = await fetch(`/api/streams/?spaceId=${spaceId}`, {
         credentials: "include",
       });
       const json = await res.json();
@@ -94,16 +98,18 @@ export default function StreamView({
         }
         return json.activeStream.stream;
       });
+      setSpaceName(json.spaceName)
     } catch (error) {
       enqueueToast("error", "Something went wrong");
     }
+  
     setPlayNextLoader(false);
   }
 
   const playNext = async () => {
     setPlayNextLoader(true);
     sendMessage("play-next", {
-      creatorId,
+      spaceId,
       userId: user?.id,
     });
   };
@@ -123,6 +129,9 @@ export default function StreamView({
   return (
     <div className="flex min-h-screen flex-col">
       <Appbar />
+      <div className='mx-auto text-2xl bg-gradient-to-r rounded-lg from-indigo-600 to-violet-800 font-bold'>
+            {spaceName}
+            </div>
       <div className="flex justify-center">
         <div className="grid w-screen max-w-screen-xl grid-cols-1 gap-4 pt-8 md:grid-cols-5">
           <Queue
@@ -130,6 +139,7 @@ export default function StreamView({
             isCreator={playVideo}
             queue={queue}
             userId={user?.id || ""}
+            spaceId={spaceId}
           />
           <div className="col-span-2">
             <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
@@ -141,6 +151,7 @@ export default function StreamView({
                 loading={loading}
                 setInputLink={setInputLink}
                 setLoading={setLoading}
+                spaceId={spaceId}
               />
 
               <NowPlaying
