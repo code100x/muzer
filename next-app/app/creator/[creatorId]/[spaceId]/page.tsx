@@ -1,37 +1,46 @@
 "use client";
-import { useEffect } from "react";
+import StreamView from "@/components/StreamView";
+import useRedirect from "@/hooks/useRedirect";
 import { useSocket } from "@/context/socket-context";
-import useRedirect from "../../hooks/useRedirect";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import jwt from "jsonwebtoken";
-import StreamView from "../../components/StreamView";
 import ErrorScreen from "@/components/ErrorScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 
-export default function Component() {
-  const { socket, user, loading, setUser, connectionError } = useSocket();
+export default function Creator({
+  params: { creatorId , spaceId },
+
+}: {
+  params: {
+    creatorId: string;
+    spaceId: string;
+  };
+}) {
+  const { socket, user, connectionError, loading, setUser } = useSocket();
   useRedirect();
 
   useEffect(() => {
     if (user && !user.token) {
       const token = jwt.sign(
         {
-          creatorId: user?.id,
-          userId: user?.id,
+          creatorId: creatorId,
+          userId: user.id,
+          spaceId: spaceId,
         },
-        process.env.NEXT_PUBLIC_SECRET || "",
-        {
-          expiresIn: "24h",
-        }
+        process.env.NEXT_PUBLIC_SECRET ?? "secret"
       );
 
       socket?.send(
         JSON.stringify({
           type: "join-room",
           data: {
+            spaceId,
             token,
           },
         })
       );
+
       setUser({ ...user, token });
     }
   }, [user]);
@@ -48,7 +57,7 @@ export default function Component() {
     return <ErrorScreen>Please Log in....</ErrorScreen>;
   }
 
-  return <StreamView creatorId={user.id} playVideo={true} />;
+  return <StreamView creatorId={creatorId} spaceId={spaceId} playVideo={false} />;
 }
 
 export const dynamic = "auto";

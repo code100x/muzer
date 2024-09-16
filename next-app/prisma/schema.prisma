@@ -20,6 +20,7 @@ model User {
   streams      Stream[] @relation("user")
   upvotes      Upvote[]
   addedStreams Stream[] @relation("addedBy")
+  Space        Space[]  @relation("hostedBy")
 }
 
 model Stream {
@@ -40,12 +41,18 @@ model Stream {
   currentStream CurrentStream?
   addedBy       String
   addedByUser   User           @relation("addedBy", fields: [addedBy], references: [id])
+  spaceId       String
+  Space         Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 }
 
 model CurrentStream {
-  userId   String  @id
-  streamId String? @unique
-  stream   Stream? @relation(fields: [streamId], references: [id])
+  userId   String @id
+  streamId String @unique
+  spaceId  String @unique
+  stream   Stream @relation(fields: [streamId], references: [id])
+  space    Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamId, spaceId])
 }
 
 model Upvote {
@@ -56,6 +63,16 @@ model Upvote {
   stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, streamId])
+}
+
+model Space {
+  id            String         @id @default(uuid())
+  name          String
+  streams       Stream[]
+  hostId        String
+  host          User           @relation("hostedBy", fields: [hostId], references: [id])
+  isActive      Boolean        @default(true)
+  currentStream CurrentStream?
 }
 
 enum StreamType {

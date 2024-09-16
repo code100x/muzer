@@ -1,3 +1,9 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,56 +13,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model CurrentStream {
-  userId   String  @id
-  streamId String? @unique
-  Stream   Stream? @relation(fields: [streamId], references: [id])
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  provider     Provider
+  streams      Stream[] @relation("user")
+  upvotes      Upvote[]
+  addedStreams Stream[] @relation("addedBy")
+  Space        Space[]  @relation("hostedBy")
 }
 
 model Stream {
-  id                        String         @id
-  type                      StreamType
-  active                    Boolean        @default(true)
-  userId                    String
-  extractedId               String
-  url                       String
-  bigImg                    String         @default("")
-  smallImg                  String         @default("")
-  title                     String         @default("")
-  createAt                  DateTime       @default(now())
-  played                    Boolean        @default(false)
-  playedTs                  DateTime?
-  addedBy                   String
-  CurrentStream             CurrentStream?
-  User_Stream_addedByToUser User           @relation("Stream_addedByToUser", fields: [addedBy], references: [id])
-  User                      User           @relation(fields: [userId], references: [id])
-  Upvote                    Upvote[]
+  id            String         @id @default(uuid())
+  type          StreamType
+  url           String
+  extractedId   String
+  title         String         @default("")
+  smallImg      String         @default("")
+  bigImg        String         @default("")
+  active        Boolean        @default(true)
+  played        Boolean        @default(false)
+  playedTs      DateTime?
+  createAt      DateTime       @default(now())
+  upvotes       Upvote[]
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], name: "user")
+  currentStream CurrentStream?
+  addedBy       String
+  addedByUser   User           @relation("addedBy", fields: [addedBy], references: [id])
+  spaceId       String
+  Space         Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
+
+model CurrentStream {
+  userId   String @id
+  streamId String @unique
+  spaceId  String @unique
+  stream   Stream @relation(fields: [streamId], references: [id])
+  space    Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamId, spaceId])
 }
 
 model Upvote {
-  id       String @id
+  id       String @id @default(uuid())
   userId   String
   streamId String
-  Stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
-  User     User   @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id])
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, streamId])
 }
 
-model User {
-  id                          String   @id
-  email                       String   @unique
-  provider                    Provider
-  Stream_Stream_addedByToUser Stream[] @relation("Stream_addedByToUser")
-  Stream                      Stream[]
-  Upvote                      Upvote[]
-}
-
-enum Provider {
-  Google
+model Space {
+  id            String         @id @default(uuid())
+  name          String
+  streams       Stream[]
+  hostId        String
+  host          User           @relation("hostedBy", fields: [hostId], references: [id])
+  isActive      Boolean        @default(true)
+  currentStream CurrentStream?
 }
 
 enum StreamType {
   Spotify
   Youtube
+}
+
+enum Provider {
+  Google
 }

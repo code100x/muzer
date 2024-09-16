@@ -10,8 +10,7 @@ export default function useRedirect() {
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.push("/");
-    } else if (!pathname.includes("creator")) {
-      router.push("/dashboard");
-    }
+    } 
+    console.log("session",session);
   }, [session]);
 }

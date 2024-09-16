@@ -37,6 +37,7 @@ async function main() {
   wss.on("connection", (ws) => {
     ws.on("message", async (raw) => {
       const { type, data } = JSON.parse(raw.toString()) || {};
+      
       if (type === "join-room") {
         jwt.verify(
           data.token,
@@ -55,6 +56,7 @@ async function main() {
             } else {
               RoomManager.getInstance().joinRoom(
                 decoded.creatorId,
+                decoded.spaceId,
                 decoded.userId,
                 ws,
                 data.token
@@ -69,6 +71,7 @@ async function main() {
           data.userId = user.userId;
           if (type === "cast-vote") {
             await RoomManager.getInstance().castVote(
+              data.spaceId,
               data.creatorId,
               data.userId,
               data.streamId,
@@ -76,12 +79,14 @@ async function main() {
             );
           } else if (type === "add-to-queue") {
             await RoomManager.getInstance().addToQueue(
+              data.spaceId,
               data.creatorId,
               data.userId,
               data.url
             );
           } else if (type === "play-next") {
             await RoomManager.getInstance().queue.add("play-next", {
+              ...data,
               creatorId: data.userId,
               userId: data.userId,
             });
@@ -97,7 +102,10 @@ async function main() {
               creatorId: data.userId,
               userId: data.userId,
             });
+          } else if(type === "delete-space"){
+            await RoomManager.getInstance().deleteSpace(data.spaceId);
           }
+
         } else {
           ws.send(
             JSON.stringify({
@@ -109,6 +117,7 @@ async function main() {
           );
         }
       }
+      
     });
 
     ws.on("close", () => {

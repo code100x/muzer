@@ -14,9 +14,11 @@ import { Appbar } from "../Appbar";
 
 export default function StreamView({
   creatorId,
+  spaceId,
   playVideo = false,
 }: {
   creatorId: string;
+  spaceId: string;
   playVideo: boolean;
 }) {
   const [inputLink, setInputLink] = useState("");
@@ -80,7 +82,7 @@ export default function StreamView({
 
   async function refreshStreams() {
     try {
-      const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
+      const res = await fetch(`/api/streams/?creatorId=${creatorId}&spaceId=${spaceId}`, {
         credentials: "include",
       });
       const json = await res.json();
@@ -103,6 +105,7 @@ export default function StreamView({
   const playNext = async () => {
     setPlayNextLoader(true);
     sendMessage("play-next", {
+      spaceId,
       creatorId,
       userId: user?.id,
     });
@@ -129,12 +132,14 @@ export default function StreamView({
             creatorId={creatorId}
             isCreator={playVideo}
             queue={queue}
+            spaceId={spaceId}
             userId={user?.id || ""}
           />
           <div className="col-span-2">
             <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
               <AddSongForm
                 creatorId={creatorId}
+                spaceId={spaceId}
                 userId={user?.id || ""}
                 enqueueToast={enqueueToast}
                 inputLink={inputLink}
@@ -142,7 +147,6 @@ export default function StreamView({
                 setInputLink={setInputLink}
                 setLoading={setLoading}
               />
-
               <NowPlaying
                 currentVideo={currentVideo}
                 playNext={playNext}

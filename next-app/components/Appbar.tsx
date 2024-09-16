@@ -11,7 +11,7 @@ export function Appbar({ showThemeSwitch = true }) {
   const handleButtonClick = () => {
     isUserLoggedIn
       ? signOut({ callbackUrl: "/" })
-      : signIn("google", { callbackUrl: "/dashboard" });
+      : signIn("google", { callbackUrl: "/home" });
   };
 
   return (

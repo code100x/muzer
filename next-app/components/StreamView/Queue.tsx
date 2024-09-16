@@ -18,9 +18,10 @@ type Props = {
   creatorId: string;
   userId: string;
   isCreator: boolean;
+  spaceId:string;
 };
 
-export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
+export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: Props) {
   const { sendMessage } = useSocket();
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
 
@@ -30,11 +31,12 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
       streamId: id,
       userId,
       creatorId,
+      spaceId
     });
   }
 
   const handleShare = () => {
-    const shareableLink = `${window.location.origin}/creator/${creatorId}`;
+    const shareableLink = `${window.location.origin}/creator/${creatorId}/${spaceId}`;
     navigator.clipboard.writeText(shareableLink).then(
       () => {
         toast.success("Link copied to clipboard!");
@@ -49,23 +51,9 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
   const emptyQueue = async () => {
     sendMessage("empty-queue", {
       creatorId: userId,
+      spaceId
     });
     setIsEmptyQueueDialogOpen(false);
-    // try {
-    //   const res = await fetch("/api/streams/empty-queue", {
-    //     method: "POST",
-    //   });
-    //   const data = await res.json();
-    //   if (res.ok) {
-    //     toast.success(data.message);
-    //     refreshStreams();
-    //   } else {
-    //     toast.error(data.message || "Failed to empty queue");
-    //   }
-    // } catch (error) {
-    //   console.error("Error emptying queue:", error);
-    //   toast.error("An error occurred while emptying the queue");
-    // }
   };
 
   const removeSong = async (streamId: string) => {
@@ -73,20 +61,8 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
       streamId,
       userId,
       creatorId,
+      spaceId
     });
-    // try {
-    //   const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {
-    //     method: "DELETE",
-    //   });
-    //   if (res.ok) {
-    //     toast.success("Song removed successfully");
-    //     refreshStreams();
-    //   } else {
-    //     toast.error("Failed to remove song");
-    //   }
-    // } catch (error) {
-    //   toast.error("An error occurred while removing the song");
-    // }
   };
 
   return (

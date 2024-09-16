@@ -10,6 +10,7 @@ type Props = {
   inputLink: string;
   creatorId: string;
   userId: string;
+  spaceId:string;
   setLoading: (value: boolean) => void;
   setInputLink: (value: string) => void;
   loading: boolean;
@@ -24,6 +25,7 @@ export default function AddSongForm({
   setLoading,
   creatorId,
   userId,
+  spaceId
 }: Props) {
   const { sendMessage } = useSocket();
 
@@ -35,6 +37,7 @@ export default function AddSongForm({
         creatorId,
         userId,
         url: inputLink,
+        spaceId
       });
     } else {
       enqueueToast("error", "Invalid please use specified formate");

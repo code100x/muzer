@@ -9,6 +9,7 @@ import { authOptions } from "@/lib/auth-options";
 
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
+  spaceId:z.string(),
   url: z.string(),
 });
 
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
       const userRecentStreams = await db.stream.count({
         where: {
           userId: data.creatorId,
+          spaceId:data.spaceId,
           addedBy: user.id,
           createAt: {
             gte: tenMinutesAgo,
@@ -77,6 +79,7 @@ export async function POST(req: NextRequest) {
       const duplicateSong = await db.stream.findFirst({
         where: {
           userId: data.creatorId,
+          spaceId:data.spaceId,
           extractedId: videoId,
           createAt: {
             gte: tenMinutesAgo,
@@ -98,6 +101,7 @@ export async function POST(req: NextRequest) {
       const streamsLastTwoMinutes = await db.stream.count({
         where: {
           userId: data.creatorId,
+          spaceId:data.spaceId,
           addedBy: user.id,
           createAt: {
             gte: twoMinutesAgo,
@@ -138,6 +142,7 @@ export async function POST(req: NextRequest) {
     const existingActiveStreams = await db.stream.count({
       where: {
         userId: data.creatorId,
+        spaceId:data.spaceId,
         played: false,
       },
     });
@@ -156,6 +161,7 @@ export async function POST(req: NextRequest) {
     const stream = await db.stream.create({
       data: {
         userId: data.creatorId,
+        spaceId:data.spaceId,
         addedBy: user.id,
         url: data.url,
         extractedId: videoId,
@@ -192,6 +198,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const creatorId = req.nextUrl.searchParams.get("creatorId");
+  const spaceId = req.nextUrl.searchParams.get("spaceId");
   const session = await getServerSession(authOptions);
 
   if (!session?.user.id) {
@@ -206,7 +213,7 @@ export async function GET(req: NextRequest) {
   }
   const user = session.user;
 
-  if (!creatorId) {
+  if (!creatorId || !spaceId) {
     return NextResponse.json(
       {
         message: "Error",
@@ -216,12 +223,13 @@ export async function GET(req: NextRequest) {
       },
     );
   }
-
+  
   const [streams, activeStream] = await Promise.all([
     db.stream.findMany({
       where: {
         userId: creatorId,
         played: false,
+        spaceId:spaceId
       },
       include: {
         _count: {
@@ -239,6 +247,7 @@ export async function GET(req: NextRequest) {
     db.currentStream.findFirst({
       where: {
         userId: creatorId,
+        spaceId:spaceId
       },
       include: {
         stream: true,
