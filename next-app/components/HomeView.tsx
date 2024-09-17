@@ -1,6 +1,6 @@
 "use client";
-import { Bounce, toast } from "react-toastify";
-import { Appbar } from "../components/Appbar";
+import { toast } from "react-toastify";
+import { Appbar } from "@/components/Appbar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,12 +8,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CardSkeleton from "./ui/cardSkeleton";
+import Image from "next/image";
 
 
 interface Space {
@@ -140,7 +140,7 @@ export default function HomeView() {
                     <div className=" text-4xl font-bold">{space.name}</div>
                   </CardHeader>
                   <CardContent className="overflow-visible flex flex-col justify-center  items-center  py-2">
-                    <img
+                    <Image
                       alt="Card background"
                       className="object-cover w-[28rem]   rounded-3xl"
                       src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"

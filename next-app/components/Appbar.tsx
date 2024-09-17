@@ -13,14 +13,14 @@ export function Appbar({ showThemeSwitch = true }) {
   const handleButtonClick = () => {
     isUserLoggedIn
       ? signOut({ callbackUrl: "/" })
-      : signIn("google", { callbackUrl: "/home" });// Use /dashboard for web socket or new stream version
+      : signIn("google", { callbackUrl: "/home" });
   };
 
   return (
     <div className="flex justify-between px-5 py-4 md:px-10 xl:px-20">
       <div
         onClick={()=>{
-        router.push('/home') // If using oldstream view this goes to home where you can see all the spaces
+        router.push('/home') 
       }}  className={`flex flex-col hover:cursor-pointer justify-center text-lg font-bold ${showThemeSwitch ? "" : "text-white"}`}
       >
         Muzer
