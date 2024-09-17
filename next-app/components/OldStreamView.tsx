@@ -22,6 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 interface Video {
   id: string;
@@ -35,6 +36,7 @@ interface Video {
   userId: string;
   upvotes: number;
   haveUpvoted: boolean;
+  spaceId:string
 }
 
 interface CustomSession extends Omit<Session, "user"> {
@@ -51,9 +53,11 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 export default function StreamView({
   creatorId,
   playVideo = false,
+  spaceId
 }: {
   creatorId: string;
   playVideo: boolean;
+  spaceId:string;
 }) {
   const [inputLink, setInputLink] = useState("");
   const [queue, setQueue] = useState<Video[]>([]);
@@ -61,15 +65,14 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
-  const { data: session } = useSession() as { data: CustomSession | null };
-  const [creatorUserId, setCreatorUserId] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
+  const [spaceName,setSpaceName]=useState("")
   const [isOpen, setIsOpen] = useState(false);
 
   async function refreshStreams() {
     try {
-      const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
+      const res = await fetch(`/api/streams/?spaceId=${spaceId}`, {
         credentials: "include",
       });
       const json = await res.json();
@@ -90,9 +93,9 @@ export default function StreamView({
         return json.activeStream?.stream || null;
       });
 
-      // Set the creator's ID
-      setCreatorUserId(json.creatorUserId);
+   
       setIsCreator(json.isCreator);
+      setSpaceName(json.spaceName)
     } catch (error) {
       console.error("Error refreshing streams:", error);
       setQueue([]);
@@ -104,7 +107,7 @@ export default function StreamView({
     refreshStreams();
     const interval = setInterval(refreshStreams, REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [creatorId]);
+  }, [spaceId]);
 
   useEffect(() => {
     if (!videoPlayerRef.current || !currentVideo) return;
@@ -145,6 +148,7 @@ export default function StreamView({
         body: JSON.stringify({
           creatorId,
           url: inputLink,
+          spaceId:spaceId
         }),
       });
       const data = await res.json();
@@ -184,6 +188,7 @@ export default function StreamView({
       method: "POST",
       body: JSON.stringify({
         streamId: id,
+        spaceId:spaceId
       }),
     });
   };
@@ -192,7 +197,7 @@ export default function StreamView({
     if (queue.length > 0) {
       try {
         setPlayNextLoader(true);
-        const data = await fetch("/api/streams/next", {
+        const data = await fetch(`/api/streams/next?spaceId=${spaceId}`, {
           method: "GET",
         });
         const json = await data.json();
@@ -207,7 +212,7 @@ export default function StreamView({
   };
 
   const handleShare = (platform: 'whatsapp' | 'twitter' | 'instagram' | 'clipboard') => {
-    const shareableLink = `${window.location.hostname}/creator/${creatorId}`
+    const shareableLink = `${window.location.hostname}/spaces/${spaceId}`
 
     if (platform === 'clipboard') {
       navigator.clipboard.writeText(shareableLink).then(() => {
@@ -265,6 +270,12 @@ export default function StreamView({
     try {
       const res = await fetch("/api/streams/empty-queue", {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          },
+        body: JSON.stringify({
+          spaceId:spaceId
+      })
       });
       const data = await res.json();
       if (res.ok) {
@@ -282,7 +293,7 @@ export default function StreamView({
 
   const removeSong = async (streamId: string) => {
     try {
-      const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {
+      const res = await fetch(`/api/streams/remove?streamId=${streamId}&spaceId=${spaceId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -299,6 +310,9 @@ export default function StreamView({
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-200">
       <Appbar />
+      <div className='mx-auto text-2xl bg-gradient-to-r rounded-lg from-indigo-600 to-violet-800 font-bold'>
+            {spaceName}
+            </div>
       <div className="flex justify-center px-5 md:px-10 xl:px-20">
         <div className="grid grid-cols-1 gap-y-5 lg:gap-x-5 lg:grid-cols-5 w-screen py-5 lg:py-8">
           <div className="col-span-3 order-2 lg:order-1">
@@ -374,7 +388,7 @@ export default function StreamView({
                     className="bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
                   >
                     <CardContent className="p-4 flex flex-col md:flex-row md:space-x-3">
-                      <img
+                      <Image
                         src={video.smallImg}
                         alt={`Thumbnail for ${video.title}`}
                         className="md:w-40 mb-5 md:mb-0 object-cover rounded-md"
@@ -468,7 +482,7 @@ export default function StreamView({
                         />
                       ) : (
                         <>
-                          <img
+                          <Image
                             src={currentVideo.bigImg}
                             className="w-full aspect-video object-cover rounded-md"
                             alt={currentVideo.title}

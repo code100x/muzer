@@ -7,9 +7,11 @@ import { YT_REGEX } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 
+
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
   url: z.string(),
+  spaceId:z.string()
 });
 
 const MAX_QUEUE_LEN = 20;
@@ -137,7 +139,7 @@ export async function POST(req: NextRequest) {
 
     const existingActiveStreams = await db.stream.count({
       where: {
-        userId: data.creatorId,
+        spaceId: data.spaceId,
         played: false,
       },
     });
@@ -169,6 +171,7 @@ export async function POST(req: NextRequest) {
         bigImg:
           thumbnails[thumbnails.length - 1].url ??
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+        spaceId:data.spaceId
       },
     });
 
@@ -191,9 +194,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const creatorId = req.nextUrl.searchParams.get("creatorId");
+  const spaceId = req.nextUrl.searchParams.get("spaceId");
   const session = await getServerSession(authOptions);
-
   if (!session?.user.id) {
     return NextResponse.json(
       {
@@ -206,56 +208,69 @@ export async function GET(req: NextRequest) {
   }
   const user = session.user;
 
-  if (!creatorId) {
-    return NextResponse.json(
-      {
-        message: "Error",
-      },
-      {
-        status: 411,
-      },
-    );
-  }
+  if (!spaceId) {
+    return NextResponse.json({
+        message: "Error"
+    }, {
+        status: 411
+    })
+}
 
-  const [streams, activeStream] = await Promise.all([
-    db.stream.findMany({
+  const [space, activeStream] = await Promise.all([
+    db.space.findUnique({
       where: {
-        userId: creatorId,
-        played: false,
+          id: spaceId,
       },
       include: {
-        _count: {
-          select: {
-            upvotes: true,
+          streams: {
+              include: {
+                  _count: {
+                      select: {
+                          upvotes: true
+                      }
+                  },
+                  upvotes: {
+                      where: {
+                          userId: session?.user.id
+                      }
+                  }
+
+              },
+              where:{
+                  played:false
+              }
           },
-        },
-        upvotes: {
-          where: {
-            userId: user.id,
-          },
-        },
-      },
-    }),
-    db.currentStream.findFirst({
+          _count: {
+              select: {
+                  streams: true
+              }
+          },                
+
+      }
+      
+  }),
+  db.currentStream.findFirst({
       where: {
-        userId: creatorId,
+          spaceId: spaceId
       },
       include: {
-        stream: true,
-      },
-    }),
+          stream: true
+      }
+  })
   ]);
 
-  const isCreator = user.id === creatorId;
+  const hostId =space?.hostId;
+  const isCreator = session.user.id=== hostId
 
   return NextResponse.json({
-    streams: streams.map(({ _count, ...rest }) => ({
-      ...rest,
-      upvotes: _count.upvotes,
-      haveUpvoted: rest.upvotes.length ? true : false,
+    streams: space?.streams.map(({_count, ...rest}) => ({
+        ...rest,
+        upvotes: _count.upvotes,
+        haveUpvoted: rest.upvotes.length ? true : false
     })),
     activeStream,
-    creatorId,
+    hostId,
     isCreator,
-  });
+    spaceName:space?.name
+});
 }

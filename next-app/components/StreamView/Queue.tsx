@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Play, Share2, Trash2, X } from "lucide-react";
 import { useSocket } from "@/context/socket-context";
 import { toast } from "react-toastify";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -19,9 +20,10 @@ type Props = {
   creatorId: string;
   userId: string;
   isCreator: boolean;
+  spaceId:string
 };
 
-export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
+export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: Props) {
   const { sendMessage } = useSocket();
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
   const [parent] = useAutoAnimate();
@@ -32,11 +34,12 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
       streamId: id,
       userId,
       creatorId,
+      spaceId
     });
   }
 
   const handleShare = () => {
-    const shareableLink = `${window.location.origin}/creator/${creatorId}`;
+    const shareableLink = `${window.location.origin}/spaces/${spaceId}`;
     navigator.clipboard.writeText(shareableLink).then(
       () => {
         toast.success("Link copied to clipboard!");
@@ -50,45 +53,17 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
 
   const emptyQueue = async () => {
     sendMessage("empty-queue", {
-      creatorId: userId,
+      spaceId:spaceId,
     });
     setIsEmptyQueueDialogOpen(false);
-    // try {
-    //   const res = await fetch("/api/streams/empty-queue", {
-    //     method: "POST",
-    //   });
-    //   const data = await res.json();
-    //   if (res.ok) {
-    //     toast.success(data.message);
-    //     refreshStreams();
-    //   } else {
-    //     toast.error(data.message || "Failed to empty queue");
-    //   }
-    // } catch (error) {
-    //   console.error("Error emptying queue:", error);
-    //   toast.error("An error occurred while emptying the queue");
-    // }
   };
 
   const removeSong = async (streamId: string) => {
     sendMessage("remove-song", {
       streamId,
       userId,
-      creatorId,
+      spaceId,
     });
-    // try {
-    //   const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {
-    //     method: "DELETE",
-    //   });
-    //   if (res.ok) {
-    //     toast.success("Song removed successfully");
-    //     refreshStreams();
-    //   } else {
-    //     toast.error("Failed to remove song");
-    //   }
-    // } catch (error) {
-    //   toast.error("An error occurred while removing the song");
-    // }
   };
 
   return (
@@ -122,7 +97,7 @@ export default function Queue({ queue, isCreator, creatorId, userId }: Props) {
           {queue.map((video) => (
             <Card key={video.id} className="">
               <CardContent className="flex items-center space-x-4 p-4">
-                <img
+                <Image
                   src={video.smallImg}
                   alt={`Thumbnail for ${video.title}`}
                   className="w-30 h-20 rounded object-cover"

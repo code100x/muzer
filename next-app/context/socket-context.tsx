@@ -52,7 +52,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
         setLoading(false);
       };
 
-      () => {
+     () => {
         ws.close();
       };
     }

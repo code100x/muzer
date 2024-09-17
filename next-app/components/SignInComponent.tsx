@@ -29,7 +29,7 @@ const SignInComponent = () => {
               className="gap-2 font-semibold"
               variant="outline"
               onClick={async () => {
-                await signIn("google", { callbackUrl: "/dashboard" });
+                await signIn("google", { callbackUrl: "/home" }); // use /dashboard for websocket
               }}
             >
               <Image src="/google.png" width={22} height={22} alt="google" />
