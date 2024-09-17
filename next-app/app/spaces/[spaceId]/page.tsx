@@ -100,7 +100,7 @@ export default function Component({params:{spaceId}}:{params:{spaceId:string}}) 
   }
 
 
-  // return <OldStreamView creatorId={session.data.user.id} spaceId={spaceId} playVideo={true} />;
+  
   
   return <StreamView creatorId={creatorId as string} playVideo={false} spaceId={spaceId} />;
   

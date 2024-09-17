@@ -17,12 +17,12 @@ export default function Component({params:{spaceId}}:{params:{spaceId:string}}) 
   const { socket, user, loading, setUser, connectionError } = useSocket();
 
 
-  const [creatorId,setCreatorId]=useState<string>();
+  const [creatorId,setCreatorId]=useState<string | null>(null);
   const [loading1, setLoading1] = useState(true);
-  const session = useSession();
+  
  
  
-  console.log(spaceId)
+  
   
   useEffect(()=>{
     async function fetchHostId(){
@@ -94,21 +94,12 @@ export default function Component({params:{spaceId}}:{params:{spaceId:string}}) 
   }
 
 
-  if(session.data?.user.id!=creatorId){
+  if(user.id!=creatorId){
     return <ErrorScreen>You are not the creator of this space</ErrorScreen>
   }
 
 
- 
-  if (session.status === "loading") {
-      return <div>Loading...</div>;
-  }
 
-  if (!session.data?.user.id) {
-      return <h1>Please Log in....</h1>;
-  }
-
-  // return <OldStreamView creatorId={session.data.user.id} spaceId={spaceId} playVideo={true} />;
   
   return <StreamView creatorId={creatorId as string} playVideo={true} spaceId={spaceId} />;
   
