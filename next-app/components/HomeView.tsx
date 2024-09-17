@@ -1,6 +1,6 @@
 "use client";
-import { Bounce, toast } from "react-toastify";
-import { Appbar } from "../components/Appbar";
+import { toast } from "react-toastify";
+import { Appbar } from "@/components/Appbar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";

@@ -1,11 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSocket } from "@/context/socket-context";
-import useRedirect from "@/hooks/useRedirect";
 import jwt from "jsonwebtoken";
-import OldStreamView from "@/components/OldStreamView";
 import StreamView from "@/components/StreamView";
-import { useSession } from "next-auth/react";
 import ErrorScreen from "@/components/ErrorScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 

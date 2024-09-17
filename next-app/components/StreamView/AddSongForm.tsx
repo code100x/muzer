@@ -23,7 +23,6 @@ export default function AddSongForm({
   setInputLink,
   loading,
   setLoading,
-  creatorId,
   userId,
   spaceId
 }: Props) {

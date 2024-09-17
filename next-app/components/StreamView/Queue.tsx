@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Play, Share2, Trash2, X } from "lucide-react";
@@ -54,21 +54,6 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
       spaceId:spaceId,
     });
     setIsEmptyQueueDialogOpen(false);
-    // try {
-    //   const res = await fetch("/api/streams/empty-queue", {
-    //     method: "POST",
-    //   });
-    //   const data = await res.json();
-    //   if (res.ok) {
-    //     toast.success(data.message);
-    //     refreshStreams();
-    //   } else {
-    //     toast.error(data.message || "Failed to empty queue");
-    //   }
-    // } catch (error) {
-    //   console.error("Error emptying queue:", error);
-    //   toast.error("An error occurred while emptying the queue");
-    // }
   };
 
   const removeSong = async (streamId: string) => {
@@ -77,19 +62,6 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
       userId,
       spaceId,
     });
-    // try {
-    //   const res = await fetch(`/api/streams/remove?streamId=${streamId}`, {
-    //     method: "DELETE",
-    //   });
-    //   if (res.ok) {
-    //     toast.success("Song removed successfully");
-    //     refreshStreams();
-    //   } else {
-    //     toast.error("Failed to remove song");
-    //   }
-    // } catch (error) {
-    //   toast.error("An error occurred while removing the song");
-    // }
   };
 
   return (

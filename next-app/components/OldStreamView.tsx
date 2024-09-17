@@ -65,8 +65,6 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
-  const { data: session } = useSession() as { data: CustomSession | null };
-  const [creatorUserId, setCreatorUserId] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
   const [spaceName,setSpaceName]=useState("")
@@ -95,8 +93,7 @@ export default function StreamView({
         return json.activeStream?.stream || null;
       });
 
-      // Set the creator's ID
-      setCreatorUserId(json.creatorUserId);
+   
       setIsCreator(json.isCreator);
       setSpaceName(json.spaceName)
     } catch (error) {

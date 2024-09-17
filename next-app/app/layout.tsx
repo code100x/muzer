@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Providers, ThemeProvider } from "../components/provider";
+import { Providers, ThemeProvider } from "@/components/provider";
 
 import "./globals.css";
 import { ToastContainer, toast, ToastContainerProps, Bounce } from 'react-toastify';
