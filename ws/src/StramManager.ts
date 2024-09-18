@@ -31,7 +31,6 @@ export class RoomManager {
   public prisma: PrismaClient;
   public queue: Queue;
   public worker: Worker;
-  public wstoSpace: Map<WebSocket,string>
 
   private constructor() {
     this.spaces = new Map();
@@ -46,7 +45,6 @@ export class RoomManager {
     this.worker = new Worker(process.pid.toString(), this.processJob, {
       connection,
     });
-    this.wstoSpace=new Map();
   }
 
   static getInstance() {
@@ -123,6 +121,7 @@ export class RoomManager {
       this.spaces.set(spaceId, {
         users:new Map<string,User>(),
         creatorId:"",
+        musicQueue:[]
       });
       // const roomsString = await this.redisClient.get("rooms");
       // if (roomsString) {
@@ -143,20 +142,11 @@ export class RoomManager {
   }
 
   async addUser(userId: string, ws: WebSocket, token: string) {
-    let user = this.users.get(userId);
-    if(!user){
-      this.users.set(userId, {
-        userId,
-        ws:[ws],
-        token,
-      });
-    }
-    else{
-      if (!user.ws.some(existingWs => existingWs === ws)) {
-        user.ws.push(ws);
-      }
-    }
-
+    this.users.set(userId, {
+      userId,
+      ws,
+      token,
+    });
   }
 
   async joinRoom(
@@ -166,12 +156,10 @@ export class RoomManager {
     ws: WebSocket,
     token: string
   ) {
-
-    console.log("Join Room"+spaceId)
    
     let space = this.spaces.get(spaceId);
     let user = this.users.get(userId);
-    
+
     if (!space) {
       await this.createRoom(spaceId);
       space = this.spaces.get(spaceId);
@@ -181,19 +169,12 @@ export class RoomManager {
       await this.addUser(userId, ws, token);
       user = this.users.get(userId);
     }
-    else{
-      if (!user.ws.some(existingWs => existingWs === ws)) {
-        user.ws.push(ws);
-      }
-    }
-
-    this.wstoSpace.set(ws,spaceId);
     
     if (space && user) {
       space.users.set(userId,user)
       this.spaces.set(spaceId, {
         ...space,
-        users:new Map(space.users),
+        users:space.users,
         creatorId:creatorId
       });
      
@@ -203,13 +184,11 @@ export class RoomManager {
   publishEmptyQueue(spaceId: string) {
     const space = this.spaces.get(spaceId);
     space?.users.forEach((user,userId) => {
-      user?.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: `empty-queue/${spaceId}`,
-          })
-        );
-      })
+      user?.ws.send(
+        JSON.stringify({
+          type: "empty-queue",
+        })
+      );
     });
   }
 
@@ -243,17 +222,15 @@ export class RoomManager {
     console.log("publishRemoveSong");
     const space = this.spaces.get(spaceId);
     space?.users.forEach((user,userId) => {
-      user?.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: `remove-song/${spaceId}`,
-            data: {
-              streamId,
-              spaceId
-            },
-          })
-        );
-      })
+      user?.ws.send(
+        JSON.stringify({
+          type: "remove-song",
+          data: {
+            streamId,
+            spaceId
+          },
+        })
+      );
     });
   }
 
@@ -282,29 +259,25 @@ export class RoomManager {
       );
     }
     else{
-      user?.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "You cant remove the song . You are not the host",
-            },
-          })
-        );
-      })
+      user?.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "You cant remove the song . You are not the host",
+          },
+        })
+      );
     }
   }
 
   publishPlayNext(spaceId: string) {
     const space = this.spaces.get(spaceId);
     space?.users.forEach((user,userId) => {
-      user?.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: `play-next/${spaceId}`,
-          })
-        );
-      })
+      user?.ws.send(
+        JSON.stringify({
+          type: "play-next",
+        })
+      );
     });
   }
 
@@ -317,16 +290,14 @@ export class RoomManager {
     }
 
     if (targetUser.userId !== creatorId) {
-      targetUser.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "You can't perform this action.",
-            },
-          })
-        );
-      })
+      targetUser.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "You can't perform this action.",
+          },
+        })
+      );
       return;
     }
 
@@ -343,16 +314,14 @@ export class RoomManager {
     });
 
     if (!mostUpvotedStream) {
-      targetUser.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "Please add video in queue",
-            },
-          })
-        );
-      })
+      targetUser.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "Please add video in queue",
+          },
+        })
+      );
       return;
     }
 
@@ -411,19 +380,17 @@ export class RoomManager {
     console.log(process.pid + " publishNewVote");
     const spaces= this.spaces.get(spaceId);
     spaces?.users.forEach((user,userId) => {
-      user?.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: `new-vote/${spaceId}`,
-            data: {
-              vote,
-              streamId,
-              votedBy,
-              spaceId
-            },
-          })
-        );
-      })
+      user?.ws.send(
+        JSON.stringify({
+          type: "new-vote",
+          data: {
+            vote,
+            streamId,
+            votedBy,
+            spaceId
+          },
+        })
+      );
     });
   }
 
@@ -491,16 +458,14 @@ export class RoomManager {
       );
   
       if (lastVoted) {
-        currentUser?.ws.forEach((ws)=>{
-          ws.send(
-            JSON.stringify({
-              type: "error",
-              data: {
-                message: "You can vote after 20 mins",
-              },
-            })
-          );
-        })
+        currentUser?.ws.send(
+          JSON.stringify({
+            type: "error",
+            data: {
+              message: "You can vote after 20 mins",
+            },
+          })
+        );
         return;
       }
     }
@@ -518,20 +483,16 @@ export class RoomManager {
   publishNewStream(spaceId: string, data: any) {
     console.log(process.pid + ": publishNewStream");
     console.log("Publish New Stream",spaceId)
-    const space= this.spaces.get(spaceId);
-  console.log(this.spaces)
+    const space= RoomManager.getInstance().spaces.get(spaceId);
 
     if (space) {
-   
       space?.users.forEach((user,userId) => {
-        user?.ws.forEach((ws)=>{
-          ws.send(
-            JSON.stringify({
-              type: `new-stream/${spaceId}`,
-              data: data,
-            })
-          );
-        })
+        user?.ws.send(
+          JSON.stringify({
+            type: "new-stream",
+            data: data,
+          })
+        );
       });
     }
   }
@@ -612,16 +573,14 @@ export class RoomManager {
         })
       );
     } else {
-      currentUser?.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "Video not found",
-            },
-          })
-        );
-      })
+      currentUser?.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "Video not found",
+          },
+        })
+      );
     }
   }
 
@@ -657,45 +616,39 @@ export class RoomManager {
       let lastAdded = await this.redisClient.get(`lastAdded-${spaceId}-${currentUserId}`);
 
     if (lastAdded) {
-      currentUser.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "You can add again after 20 min.",
-            },
-          })
-        );
-      })
+      currentUser.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "You can add again after 20 min.",
+          },
+        })
+      );
       return;
     }
     let alreadyAdded = await this.redisClient.get(`${spaceId}-${url}`);
 
     if (alreadyAdded) {
-      currentUser.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "This song is blocked for 1 hour",
-            },
-          })
-        );
-      })
+      currentUser.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "This song is blocked for 1 hour",
+          },
+        })
+      );
       return;
     }
 
     if (previousQueueLength >= MAX_QUEUE_LENGTH) {
-      currentUser.ws.forEach((ws)=>{
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: {
-              message: "Queue limit reached",
-            },
-          })
-        );
-      })
+      currentUser.ws.send(
+        JSON.stringify({
+          type: "error",
+          data: {
+            message: "Queue limit reached",
+          },
+        })
+      );
       return;
     }
     }
@@ -711,43 +664,42 @@ export class RoomManager {
 
   disconnect(ws: WebSocket) {
     console.log(process.pid + ": disconnect");
-    let userId: string | null = null;
-    const spaceId= this.wstoSpace.get(ws);
-    this.users.forEach((user,id) => {
-      const wsIndex= user.ws.indexOf(ws);
-
-      if(wsIndex!==-1){
-        userId = id;
-        user.ws.splice(wsIndex, 1);
-      }
-      if(user.ws.length===0){
-        this.users.delete(id)
+    let user: string | null = null;
+    this.users.forEach((usr) => {
+      if (!user && usr.ws === ws) {
+        user = usr.userId;
       }
     });
 
 
-    if (userId && spaceId) {
-      const space=this.spaces.get(spaceId)
-      if(space){
-        const updatedUsers = new Map(
-          Array.from(space.users).filter(([usrId]) => userId !== usrId)
-        )
-        this.spaces.set(spaceId, {
-          ...space,
-          users: updatedUsers
-        });
-      }
+    if (user) {
+      
+      this.spaces.forEach((space, spaceId) => {
+      
+        if (space.users.has(user as string)) {
+          const updatedUsers = new Map(
+            Array.from(space.users).filter(([userId]) => userId !== user)
+          )
+          this.spaces.set(spaceId, {
+            ...space,
+            users: updatedUsers
+          });
+        }
+      });
+      
+      this.users.delete(user);
     }
   }
 }
 
 type User = {
   userId: string;
-  ws: WebSocket[];
+  ws: WebSocket;
   token: string;
 };
 
 type Space = {
   creatorId: string;
   users: Map<String,User>;
+  musicQueue: any[];
 };

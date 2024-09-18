@@ -36,10 +36,9 @@ export default function StreamView({
     if (socket) {
       socket.onmessage = async (event) => {
         const { type, data } = JSON.parse(event.data) || {};
-        if (type === `new-stream/${spaceId}`) {
-          console.log(type)
+        if (type === "new-stream") {
           addToQueue(data);
-        } else if (type === `new-vote/${spaceId}`) {
+        } else if (type === "new-vote") {
           setQueue((prev) => {
             return prev
               .map((v) => {
@@ -60,13 +59,13 @@ export default function StreamView({
         } else if (type === "error") {
           enqueueToast("error", data.message);
           setLoading(false);
-        } else if (type === `play-next/${spaceId}`) {
+        } else if (type === "play-next") {
           await refreshStreams();
-        } else if (type === `remove-song/${spaceId}`) {
+        } else if (type === "remove-song") {
           setQueue((prev) => {
             return prev.filter((stream) => stream.id !== data.streamId);
           });
-        } else if (type === `empty-queue/${spaceId}`) {
+        } else if (type === "empty-queue") {
           setQueue([]);
         }
       };
