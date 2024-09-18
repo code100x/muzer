@@ -22,7 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
+
 
 interface Video {
   id: string;
@@ -388,7 +388,7 @@ export default function StreamView({
                     className="bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
                   >
                     <CardContent className="p-4 flex flex-col md:flex-row md:space-x-3">
-                      <Image
+                      <img
                         src={video.smallImg}
                         alt={`Thumbnail for ${video.title}`}
                         className="md:w-40 mb-5 md:mb-0 object-cover rounded-md"
@@ -482,7 +482,7 @@ export default function StreamView({
                         />
                       ) : (
                         <>
-                          <Image
+                          <img
                             src={currentVideo.bigImg}
                             className="w-full aspect-video object-cover rounded-md"
                             alt={currentVideo.title}

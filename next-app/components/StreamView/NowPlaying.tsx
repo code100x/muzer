@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 //@ts-ignore
 import YouTubePlayer from "youtube-player";
-import Image from "next/image";
 
 type Props = {
   playVideo: boolean;
@@ -59,7 +58,7 @@ export default function NowPlaying({
                 </>
               ) : (
                 <>
-                  <Image
+                  <img
                     alt={currentVideo.bigImg}
                     src={currentVideo.bigImg}
                     className="h-72 w-full rounded object-cover"
