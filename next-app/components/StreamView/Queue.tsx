@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Image from "next/image";
 
 type Props = {
   queue: Video[];
@@ -93,10 +94,12 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
           {queue.map((video) => (
             <Card key={video.id} className="">
               <CardContent className="flex items-center space-x-4 p-4">
-                <img
+                <Image
+                height={80}
+                width={128}
                   src={video.smallImg}
                   alt={`Thumbnail for ${video.title}`}
-                  className="w-30 h-20 rounded object-cover"
+                  className="w-32 h-20 rounded object-cover"
                 />
                 <div className="flex-grow">
                   <h3 className="font-semibold">{video.title}</h3>
