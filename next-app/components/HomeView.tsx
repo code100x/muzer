@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { Appbar } from "@/components/Appbar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CardSkeleton from "./ui/cardSkeleton";
-
+import Image from "next/image";
 
 
 interface Space {
@@ -142,10 +141,8 @@ export default function HomeView() {
                   </CardHeader>
                   <CardContent className="overflow-visible flex flex-col justify-center  items-center  py-2">
                     <Image
-                      width={450}
-                      height={300}
                       alt="Card background"
-                      className="object-cover w-[28rem] rounded-3xl"
+                      className="object-cover w-[28rem]   rounded-3xl"
                       src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     />
                     <div className="flex justify-between space-x-6">
