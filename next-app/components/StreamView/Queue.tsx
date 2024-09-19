@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Play, Share2, Trash2, X } from "lucide-react";
 import { useSocket } from "@/context/socket-context";
 import { toast } from "react-toastify";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Image from "next/image";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 type Props = {
   queue: Video[];
@@ -25,6 +26,7 @@ type Props = {
 export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: Props) {
   const { sendMessage } = useSocket();
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
+  const [parent] = useAutoAnimate();
 
   function handleVote(id: string, isUpvote: boolean) {
     sendMessage("cast-vote", {
@@ -91,6 +93,7 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
               </CardContent>
             </Card>
           )}
+          <div className="space-y-4" ref={parent}>
           {queue.map((video) => (
             <Card key={video.id} className="">
               <CardContent className="flex items-center space-x-4 p-4">
@@ -133,6 +136,7 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
               </CardContent>
             </Card>
           ))}
+          </div>
         </div>
       </div>
       <Dialog
