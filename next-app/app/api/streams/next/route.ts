@@ -1,9 +1,9 @@
 import { authOptions } from "@/lib/auth-options";
 import db from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user.id) {
@@ -17,11 +17,13 @@ export async function GET() {
     );
   }
   const user = session.user;
+  const spaceId = req.nextUrl.searchParams.get("spaceId");
 
   const mostUpvotedStream = await db.stream.findFirst({
     where: {
       userId: user.id,
       played: false,
+      spaceId:spaceId
     },
     orderBy: {
       upvotes: {
@@ -33,15 +35,17 @@ export async function GET() {
   await Promise.all([
     db.currentStream.upsert({
       where: {
-        userId: user.id,
+        spaceId:spaceId as string
       },
       update: {
         userId: user.id,
         streamId: mostUpvotedStream?.id,
+        spaceId:spaceId
       },
       create: {
         userId: user.id,
         streamId: mostUpvotedStream?.id,
+        spaceId:spaceId 
       },
     }),
     db.stream.update({

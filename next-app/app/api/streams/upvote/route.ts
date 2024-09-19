@@ -6,6 +6,7 @@ import { z } from "zod";
 
 const UpvoteSchema = z.object({
   streamId: z.string(),
+  spaceId:z.string()
 });
 
 export async function POST(req: NextRequest) {

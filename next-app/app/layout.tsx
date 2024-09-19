@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Providers, ThemeProvider } from "../components/provider";
+import { Providers, ThemeProvider } from "@/components/provider";
 
 import "./globals.css";
+import { ToastContainer, toast, ToastContainerProps, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+const globalToastOptions: ToastContainerProps = {
+  position: "top-right",
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  theme: "light",
+  transition: Bounce,
+};
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-[#1b1934b2]`}>
+      <ToastContainer {...globalToastOptions}/>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
