@@ -4,7 +4,7 @@ import { Button } from '../ui/button'
 
 const CTA = () => {
   return (
-    <section className="w-full py-10 md:py-24 lg:py-32 translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:1000ms]">
+    <section className="w-full py-10 md:mb-10 md:pb-10 translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:1000ms]">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
