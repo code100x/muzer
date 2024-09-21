@@ -100,6 +100,7 @@ export default function StreamView({
         return json.activeStream.stream;
       });
       setSpaceName(json.spaceName)
+      enqueueToast("success", "New Song played");
     } catch (error) {
       enqueueToast("error", "Something went wrong");
     }
@@ -129,7 +130,7 @@ export default function StreamView({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Appbar />
+      <Appbar isSpectator={!playVideo}/>
       <div className='mx-auto text-2xl bg-gradient-to-r rounded-lg from-indigo-600 to-violet-800 font-bold'>
             {spaceName}
             </div>
@@ -153,8 +154,8 @@ export default function StreamView({
                 setInputLink={setInputLink}
                 setLoading={setLoading}
                 spaceId={spaceId}
+                isSpectator={!playVideo}
               />
-
               <NowPlaying
                 currentVideo={currentVideo}
                 playNext={playNext}

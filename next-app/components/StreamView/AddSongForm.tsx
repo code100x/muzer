@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { useSession } from "next-auth/react";
+
+
 
 type Props = {
   inputLink: string;
@@ -14,7 +19,8 @@ type Props = {
   setInputLink: (value: string) => void;
   loading: boolean;
   enqueueToast: (type: "error" | "success", message: string) => void;
-  spaceId:string
+  spaceId:string,
+  isSpectator:boolean
 };
 
 export default function AddSongForm({
@@ -24,9 +30,13 @@ export default function AddSongForm({
   loading,
   setLoading,
   userId,
-  spaceId
+  spaceId,
+  isSpectator,
 }: Props) {
   const { sendMessage } = useSocket();
+  const wallet = useWallet();
+  const {connection} = useConnection();
+  const user = useSession().data?.user;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +52,56 @@ export default function AddSongForm({
       enqueueToast("error", "Invalid please use specified formate");
     }
     setInputLink("");
+  };
+
+  const handlePayAndPlay = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if(!wallet.publicKey || !connection){
+      enqueueToast("error", "Please connect your wallet");
+      return;
+    }
+    if (!inputLink.match(YT_REGEX)) {
+      enqueueToast("error", "Invalid please use specified formate");
+    }
+    try{
+      const transaction = new Transaction();
+      transaction.add(
+          SystemProgram.transfer({
+              fromPubkey: wallet.publicKey,
+              toPubkey: new PublicKey(process.env.NEXT_PUBLIC_PUBLICKEY as string),
+              lamports: Number(process.env.NEXT_PUBLIC_SOL_PER_PAYMENT) * LAMPORTS_PER_SOL,
+          })
+      )
+
+      // sign Transaction steps 
+      const blockHash = await connection.getLatestBlockhash();
+      transaction.feePayer = wallet.publicKey;
+      transaction.recentBlockhash = blockHash.blockhash;
+      //@ts-ignore
+      const signed = await wallet.signTransaction(transaction);
+      
+
+      const signature = await connection.sendRawTransaction(signed.serialize());
+      
+      enqueueToast("success", `Transaction signature: ${signature}`);
+      await connection.confirmTransaction({
+          blockhash: blockHash.blockhash,
+          lastValidBlockHeight: blockHash.lastValidBlockHeight,
+          signature
+      });
+      enqueueToast("success", `Payment successful`);
+      sendMessage("pay-and-play-next", {
+        spaceId,
+        userId: user?.id,
+        url:inputLink
+      });
+    }
+    catch(error){
+      enqueueToast("error", `Payment unsuccessful`);
+    }
+    
+
   };
 
   const videoId = inputLink ? inputLink.match(YT_REGEX)?.[1] : undefined;
@@ -67,6 +127,18 @@ export default function AddSongForm({
         >
           {loading ? "Loading..." : "Add to Queue"}
         </Button>
+        
+        { isSpectator && 
+          <Button
+            disabled={loading}
+            onClick={handlePayAndPlay}
+            type="submit"
+            className="w-full"
+          >
+            {loading ? "Loading..." : "Pay and Play"}
+          </Button>
+        }
+        
       </form>
 
       {videoId && !loading && (

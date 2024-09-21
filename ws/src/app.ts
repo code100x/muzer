@@ -101,6 +101,12 @@ async function main() {
               spaceId: data.spaceId,
               userId: data.userId,
             });
+          } else if (type === "pay-and-play-next"){
+            await RoomManager.getInstance().payAndPlayNext(
+              data.spaceId,
+              data.userId,
+              data.url
+            )
           }
         } else {
           ws.send(

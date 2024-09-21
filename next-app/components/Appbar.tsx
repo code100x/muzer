@@ -3,8 +3,13 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import {
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from '@solana/wallet-adapter-react-ui';
 
-export function Appbar({ showThemeSwitch = true }) {
+
+export function Appbar({ showThemeSwitch = true , isSpectator=false }) {
   const session = useSession();
   const router= useRouter();
   const isUserLoggedIn = session.data?.user;
@@ -26,6 +31,7 @@ export function Appbar({ showThemeSwitch = true }) {
         Muzer
       </div>
       <div className="flex items-center gap-2">
+        {isSpectator && <WalletMultiButton/>}
         {showThemeSwitch && <ThemeSwitcher />}
         <Button onClick={handleButtonClick}>{buttonTitle}</Button>
       </div>
