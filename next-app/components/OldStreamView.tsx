@@ -13,6 +13,7 @@ import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
 import { useSession } from "next-auth/react";
 import type { Session } from "next-auth";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
+
+
 
 interface Video {
   id: string;
@@ -389,6 +391,8 @@ export default function StreamView({
                   >
                     <CardContent className="p-4 flex flex-col md:flex-row md:space-x-3">
                       <Image
+                      width={160}
+                      height={160}
                         src={video.smallImg}
                         alt={`Thumbnail for ${video.title}`}
                         className="md:w-40 mb-5 md:mb-0 object-cover rounded-md"
