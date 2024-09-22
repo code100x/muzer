@@ -43,9 +43,6 @@ export const authOptions = {
             }
           });
 
-          //console.log(user);
-
-
           if (!user) {
             const hashedPassword = await bcrypt.hash(passwordValidation.data, 10);
 
@@ -57,7 +54,6 @@ export const authOptions = {
               }
             });
 
-            //  console.log(newUser);
             return newUser;
           }
 
@@ -123,6 +119,9 @@ export const authOptions = {
           session.user.id = user.id;
         }
       } catch (error) {
+        if (error instanceof PrismaClientInitializationError) {
+          throw new Error("Internal server error");
+        }
         console.log(error);
         throw error;
       }

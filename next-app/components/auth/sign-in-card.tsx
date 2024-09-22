@@ -35,7 +35,6 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
           if (res?.error) {
             setError(res.error);
           }
-          //console.log(res);
           if (!res?.error) {
             router.push("/");
           }

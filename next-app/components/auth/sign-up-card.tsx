@@ -42,7 +42,6 @@ export default function SignupCard({ setFormType: setState }: SignupCardProps) {
           if (res?.error) {
             setError(res.error);
           }
-          //console.log(res);
           if (!res?.error) {
             router.push("/");
           }
