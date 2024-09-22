@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Users, Radio, Headphones } from "lucide-react";
 import { Appbar } from "@/components/Appbar";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth-options";
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions);
-   if (session?.user.id) redirect("/home"); 
+  if (session?.user.id) redirect("/home");
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
@@ -29,7 +29,14 @@ export default async function LandingPage() {
             </div>
             <div className="space-x-4">
               <Button className="bg-purple-600 text-white hover:bg-purple-700">
-                <Link href="/signin">Get Started</Link>
+                <Link
+                  href={{
+                    pathname: "/auth",
+                    query: { authType: "signUp" },
+                  }}
+                >
+                  Get Started
+                </Link>
               </Button>
               <Button className="bg-white text-purple-400 hover:bg-white/90">
                 Learn More
@@ -76,20 +83,30 @@ export default async function LandingPage() {
                 experiences.
               </p>
             </div>
-            <div className="w-full max-w-sm space-y-2">
-              <form className="flex space-x-2">
-                <Input
-                  className="max-w-lg flex-1 border-gray-700 bg-gray-800 text-white placeholder-gray-500"
+            <div className="w-full max-w-sm">
+              {/*<form className="flex space-x-2">
+                 <Input
+                  className="focus-visible:ring-offset-0 focus-visible:ring-purple-600 bg-gray-800  bg-opacity-50 placeholder:text-gray-400 border-gray-400 text-white"
                   placeholder="Enter your email"
+                  ref={mailRef}
                   type="email"
-                />
+                /> */}
+              <Link
+                href={{
+                  pathname: "/auth",
+                  query: {
+                    authType: "signUp",
+                  },
+                }}
+              >
                 <Button
                   type="submit"
                   className="bg-purple-600 text-white hover:bg-purple-700"
                 >
                   Sign Up
                 </Button>
-              </form>
+              </Link>
+              {/* </form> */}
             </div>
           </div>
         </div>
