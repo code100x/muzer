@@ -9,11 +9,11 @@ export default async function middleware(req: NextRequest) {
 
     
     if (!isAuthenticated && (pathSegments[1] == 'home' || pathSegments[1] == 'dashboard' || pathSegments[1] == 'spaces')) {
-        const loginPath = `/signin`;
+        const loginPath = `/auth`;
         const loginURL = new URL(loginPath, req.nextUrl.origin);
         return NextResponse.redirect(loginURL.toString());
     }
-    if ((isAuthenticated && pathSegments[1] == "signin")) {
+    if ((isAuthenticated && pathSegments[1] == "auth")) {
         const newURL = new URL("/home", req.nextUrl.origin);
         return NextResponse.redirect(newURL.toString());
     }

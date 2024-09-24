@@ -51,6 +51,7 @@ export default function AddSongForm({
     } else {
       enqueueToast("error", "Invalid please use specified formate");
     }
+    setLoading(false);
     setInputLink("");
   };
 
@@ -65,6 +66,7 @@ export default function AddSongForm({
       enqueueToast("error", "Invalid please use specified formate");
     }
     try{
+      setLoading(true);
       const transaction = new Transaction();
       transaction.add(
           SystemProgram.transfer({
@@ -100,7 +102,7 @@ export default function AddSongForm({
     catch(error){
       enqueueToast("error", `Payment unsuccessful`);
     }
-    
+    setLoading(false);
 
   };
 
