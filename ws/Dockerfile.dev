@@ -1,4 +1,3 @@
-# Stage 1: Install dependencies
 FROM node:22-alpine AS installer
 
 WORKDIR /usr/src/app
@@ -8,10 +7,12 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY . .
 RUN pnpm postinstall
 
-# Stage 2: Development server
+
 FROM node:22-alpine AS dev
 
 WORKDIR /usr/src/app
 RUN corepack enable pnpm
 COPY --from=installer /usr/src/app/ ./
-CMD [ "pnpm", "dev:docker" ]
+CMD [ "pnpm", "dev" ]
+
+
