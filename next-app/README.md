@@ -26,6 +26,7 @@
 2. Navigate to the project directory:
    ```bash
    cd muzer
+   cd next-app
    ```
 3. (optional) Start a PostgreSQL database using Docker:
    ```bash
