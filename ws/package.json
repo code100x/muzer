@@ -2,12 +2,13 @@
   "name": "ws",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.ts",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "nodemon src/app.ts",
     "start": "node dist/app.js",
-    "build": "prisma generate && npx tsc -b"
+    "build": "pnpm postinstall && npx tsc -b",
+    "postinstall": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
