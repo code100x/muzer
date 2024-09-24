@@ -100,7 +100,7 @@ export default function StreamView({
         return json.activeStream.stream;
       });
       setSpaceName(json.spaceName)
-      enqueueToast("success", "New Song played");
+      
     } catch (error) {
       enqueueToast("error", "Something went wrong");
     }

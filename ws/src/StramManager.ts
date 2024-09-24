@@ -380,7 +380,7 @@ export class RoomManager {
           type: "play-next",
         })
       );
-      console.log("Pay and play next")
+      
     }
 
   }
@@ -407,7 +407,7 @@ export class RoomManager {
       return;
     }
 
-    console.log("playing1");
+    
 
     const mostUpvotedStream = await this.prisma.stream.findFirst({
       where: {
@@ -434,7 +434,7 @@ export class RoomManager {
       })
       return;
     }
-    console.log("playing2");
+    
     await Promise.all([
       this.prisma.currentStream.upsert({
         where: {
@@ -472,7 +472,7 @@ export class RoomManager {
         previousQueueLength - 1
       );
     }
-    console.log("playing3");
+    
     await this.publisher.publish(
       spaceId,
       JSON.stringify({
@@ -598,7 +598,7 @@ export class RoomManager {
     console.log(process.pid + ": publishNewStream");
     console.log("Publish New Stream",spaceId)
     const space= this.spaces.get(spaceId);
-  console.log(this.spaces)
+  
 
     if (space) {
    
@@ -706,7 +706,7 @@ export class RoomManager {
 
   async addToQueue(spaceId: string, currentUserId: string, url: string) {
     console.log(process.pid + ": addToQueue");
-    console.log(this.spaces);
+    
     const space = this.spaces.get(spaceId);
     const currentUser = this.users.get(currentUserId);
     const creatorId=this.spaces.get(spaceId)?.creatorId;
