@@ -1,0 +1,107 @@
+services:
+  app:
+    container_name: muzer-docker
+    build:
+      context: ./next-app/
+      dockerfile: Dockerfile.dev
+    env_file:
+      - path: ./next-app/.env
+    ports:
+      - ${APP_PORT}:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./next-app
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./next-app/package.json
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+
+  postgres:
+    container_name: prisma-postgres
+    image: postgres:alpine
+    restart: always
+    env_file:
+      - path: ./next-app/.env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prisma-studio:
+    container_name: prisma-studio
+    image: timothyjmiller/prisma-studio:latest
+    restart: unless-stopped
+    env_file:
+      - path: ./next-app/.env
+    depends_on:
+      - app
+    ports:
+      - ${PRISMA_STUDIO_PORT}:5555
+
+  redis:
+    container_name: redis-server
+    image: redis/redis-stack:latest
+    restart: always
+    env_file:
+      - path: ./ws/.env
+    ports:
+      - ${REDIS_PORT}:6379
+      - ${REDIS_BROWSER_STACK_PORT}:8001
+    environment:
+      REDIS_ARGS: "--requirepass ${REDIS_PASSWORD} --user ${REDIS_USERNAME} on >${REDIS_PASSWORD} ~* allcommands --user default off nopass nocommands"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  websockets:
+    container_name: websockets
+    restart: always
+    build:
+      context: ./ws/
+      dockerfile: Dockerfile.dev
+    env_file:
+      - path: ./ws/.env
+    ports:
+      - ${PORT}:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./ws
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./ws/package.json
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+
+volumes:
+  postgres-data:
+    external: false
+  redis-data:
+    external: false
