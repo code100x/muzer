@@ -51,8 +51,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ToastContainer {...globalToastOptions} />
+      <body className={`${inter.className} bg-[#1b1934b2]`}>
+       <ToastContainer {...globalToastOptions}/>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
