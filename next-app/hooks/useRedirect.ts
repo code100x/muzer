@@ -10,6 +10,6 @@ export default function useRedirect() {
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.push("/");
-     }
+    }
   }, [session]);
 }
