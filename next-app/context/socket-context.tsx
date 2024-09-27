@@ -32,7 +32,6 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
   const session = useSession();
 
-
   useEffect(() => {
     if (!socket && session.data?.user.id) {
       const ws = new WebSocket(process.env.NEXT_PUBLIC_WSS_URL as string);
@@ -53,7 +52,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
         setLoading(false);
       };
 
-     () => {
+      () => {
         ws.close();
       };
     }
@@ -86,7 +85,7 @@ export const useSocket = () => {
           ...data,
           token: user?.token,
         },
-      })
+      }),
     );
   };
 

@@ -6,7 +6,6 @@ import { Play } from "lucide-react";
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
 
-
 type Props = {
   playVideo: boolean;
   currentVideo: Video | null;

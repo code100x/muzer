@@ -8,8 +8,8 @@ import SignupCard from "./sign-up-card";
 export default function AuthScreen({ authType }: { authType?: SignInFlow }) {
   const [formType, setFormType] = useState<SignInFlow>(authType || "signIn");
   return (
-    <div className=" w-full h-full flex items-center justify-center gap-5 bg-gradient-to-b from-purple-900 to-gray-900">
-      <div className="w-full md:h-auto md:w-[420px] px-4">
+    <div className="flex h-full w-full items-center justify-center gap-5 bg-gradient-to-b from-purple-900 to-gray-900">
+      <div className="w-full px-4 md:h-auto md:w-[420px]">
         {formType === "signIn" ? (
           <SigninCard setFormType={setFormType} />
         ) : (

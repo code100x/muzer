@@ -12,12 +12,12 @@ export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ""
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
     Credentials({
       credentials: {
         email: { type: "email" },
-        password: { type: "password" }
+        password: { type: "password" },
       },
       async authorize(credentials) {
         if (!credentials || !credentials.email || !credentials.password) {
@@ -30,7 +30,9 @@ export const authOptions = {
           throw new Error("Invalid email");
         }
 
-        const passwordValidation = passwordSchema.safeParse(credentials.password);
+        const passwordValidation = passwordSchema.safeParse(
+          credentials.password,
+        );
 
         if (!passwordValidation.success) {
           throw new Error(passwordValidation.error.issues[0].message);
@@ -39,39 +41,48 @@ export const authOptions = {
         try {
           const user = await prisma.user.findUnique({
             where: {
-              email: emailValidation.data
-            }
+              email: emailValidation.data,
+            },
           });
 
           if (!user) {
-            const hashedPassword = await bcrypt.hash(passwordValidation.data, 10);
+            const hashedPassword = await bcrypt.hash(
+              passwordValidation.data,
+              10,
+            );
 
             const newUser = await prisma.user.create({
               data: {
                 email: emailValidation.data,
                 password: hashedPassword,
-                provider: "Credentials"
-              }
+                provider: "Credentials",
+              },
             });
 
             return newUser;
           }
 
           if (!user.password) {
-            const hashedPassword = await bcrypt.hash(passwordValidation.data, 10);
+            const hashedPassword = await bcrypt.hash(
+              passwordValidation.data,
+              10,
+            );
 
             const authUser = await prisma.user.update({
               where: {
-                email: emailValidation.data
+                email: emailValidation.data,
               },
               data: {
-                password: hashedPassword
-              }
+                password: hashedPassword,
+              },
             });
             return authUser;
           }
 
-          const passwordVerification = await bcrypt.compare(passwordValidation.data, user.password);
+          const passwordVerification = await bcrypt.compare(
+            passwordValidation.data,
+            user.password,
+          );
 
           if (!passwordVerification) {
             throw new Error("Invalid password");
@@ -85,16 +96,15 @@ export const authOptions = {
           console.log(error);
           throw error;
         }
-
       },
-    })
+    }),
   ],
   pages: {
-    signIn: "/auth"
+    signIn: "/auth",
   },
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, account, profile }) {
@@ -104,15 +114,12 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }: {
-      session: Session,
-      token: JWT;
-    }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       try {
         const user = await prisma.user.findUnique({
           where: {
-            email: token.email
-          }
+            email: token.email,
+          },
         });
 
         if (user) {
@@ -128,24 +135,21 @@ export const authOptions = {
       return session;
     },
     async signIn({ account, profile }) {
-
       try {
         if (account?.provider === "google") {
-
           const user = await prisma.user.findUnique({
             where: {
               email: profile?.email!,
-            }
+            },
           });
-
 
           if (!user) {
             const newUser = await prisma.user.create({
               data: {
                 email: profile?.email!,
                 name: profile?.name || undefined,
-                provider: "Google"
-              }
+                provider: "Google",
+              },
             });
           }
         }
@@ -155,6 +159,6 @@ export const authOptions = {
         //throw error;
         return false;
       }
-    }
-  }
+    },
+  },
 } satisfies NextAuthOptions;

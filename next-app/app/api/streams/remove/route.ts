@@ -6,7 +6,7 @@ import { z } from "zod";
 
 const RemoveStreamSchema = z.object({
   streamId: z.string(),
-  spaceId:z.string()
+  spaceId: z.string(),
 });
 
 export async function DELETE(req: NextRequest) {
@@ -27,7 +27,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const streamId = searchParams.get("streamId");
-    const spaceId = searchParams.get('spaceId')
+    const spaceId = searchParams.get("spaceId");
 
     if (!streamId) {
       return NextResponse.json(
@@ -44,7 +44,7 @@ export async function DELETE(req: NextRequest) {
       where: {
         id: streamId,
         userId: user.id,
-        spaceId:spaceId
+        spaceId: spaceId,
       },
     });
 

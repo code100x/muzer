@@ -3,7 +3,7 @@ import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req:NextRequest) {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -17,14 +17,14 @@ export async function POST(req:NextRequest) {
     );
   }
   const user = session.user;
-  const data = await req.json()
+  const data = await req.json();
 
   try {
     await db.stream.updateMany({
       where: {
         userId: user.id,
         played: false,
-        spaceId:data.spaceId
+        spaceId: data.spaceId,
       },
       data: {
         played: true,

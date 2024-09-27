@@ -20,10 +20,16 @@ type Props = {
   creatorId: string;
   userId: string;
   isCreator: boolean;
-  spaceId:string
+  spaceId: string;
 };
 
-export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: Props) {
+export default function Queue({
+  queue,
+  isCreator,
+  creatorId,
+  userId,
+  spaceId,
+}: Props) {
   const { sendMessage } = useSocket();
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
   const [parent] = useAutoAnimate();
@@ -34,7 +40,7 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
       streamId: id,
       userId,
       creatorId,
-      spaceId
+      spaceId,
     });
   }
 
@@ -53,7 +59,7 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
 
   const emptyQueue = async () => {
     sendMessage("empty-queue", {
-      spaceId:spaceId,
+      spaceId: spaceId,
     });
     setIsEmptyQueueDialogOpen(false);
   };
@@ -94,48 +100,48 @@ export default function Queue({ queue, isCreator, creatorId, userId,spaceId }: P
             </Card>
           )}
           <div className="space-y-4" ref={parent}>
-          {queue.map((video) => (
-            <Card key={video.id} className="">
-              <CardContent className="flex items-center space-x-4 p-4">
-                <Image
-                height={80}
-                width={128}
-                  src={video.smallImg}
-                  alt={`Thumbnail for ${video.title}`}
-                  className="w-32 h-20 rounded object-cover"
-                />
-                <div className="flex-grow">
-                  <h3 className="font-semibold">{video.title}</h3>
-                  <div className="mt-2 flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleVote(video.id, video.haveUpvoted ? false : true)
-                      }
-                      className="flex items-center space-x-1"
-                    >
-                      {video.haveUpvoted ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronUp className="h-4 w-4" />
-                      )}
-                      <span>{video.upvotes}</span>
-                    </Button>
-                    {isCreator && (
+            {queue.map((video) => (
+              <Card key={video.id} className="">
+                <CardContent className="flex items-center space-x-4 p-4">
+                  <Image
+                    height={80}
+                    width={128}
+                    src={video.smallImg}
+                    alt={`Thumbnail for ${video.title}`}
+                    className="h-20 w-32 rounded object-cover"
+                  />
+                  <div className="flex-grow">
+                    <h3 className="font-semibold">{video.title}</h3>
+                    <div className="mt-2 flex items-center space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => removeSong(video.id)}
+                        onClick={() =>
+                          handleVote(video.id, video.haveUpvoted ? false : true)
+                        }
+                        className="flex items-center space-x-1"
                       >
-                        <X className="h-4 w-4" />
+                        {video.haveUpvoted ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronUp className="h-4 w-4" />
+                        )}
+                        <span>{video.upvotes}</span>
                       </Button>
-                    )}
+                      {isCreator && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeSong(video.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     where: {
       userId: user.id,
       played: false,
-      spaceId:spaceId
+      spaceId: spaceId,
     },
     orderBy: {
       upvotes: {
@@ -35,17 +35,17 @@ export async function GET(req: NextRequest) {
   await Promise.all([
     db.currentStream.upsert({
       where: {
-        spaceId:spaceId as string
+        spaceId: spaceId as string,
       },
       update: {
         userId: user.id,
         streamId: mostUpvotedStream?.id,
-        spaceId:spaceId
+        spaceId: spaceId,
       },
       create: {
         userId: user.id,
         streamId: mostUpvotedStream?.id,
-        spaceId:spaceId 
+        spaceId: spaceId,
       },
     }),
     db.stream.update({

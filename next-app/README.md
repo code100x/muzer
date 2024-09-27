@@ -2,7 +2,6 @@
 
 ## Table of contents
 
-
 1. Clone the repository:
    ```bash
    git clone https://github.com/code100x/muzer
@@ -54,6 +53,7 @@
    ```bash
    pnpm run dev
    ```
+
 ## Usage
 
 1. Access the aplication in your browser at `http://localhost:3000`

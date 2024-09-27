@@ -1,5 +1,5 @@
 "use client";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -15,19 +15,18 @@ import { Appbar } from "../Appbar";
 export default function StreamView({
   creatorId,
   playVideo = false,
-  spaceId
+  spaceId,
 }: {
   creatorId: string;
   playVideo: boolean;
-  spaceId:string;
+  spaceId: string;
 }) {
   const [inputLink, setInputLink] = useState("");
   const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
-  const [spaceName,setSpaceName]=useState("")
-
+  const [spaceName, setSpaceName] = useState("");
 
   const { socket, sendMessage } = useSocket();
   const user = useSession().data?.user;
@@ -37,7 +36,7 @@ export default function StreamView({
       socket.onmessage = async (event) => {
         const { type, data } = JSON.parse(event.data) || {};
         if (type === `new-stream/${spaceId}`) {
-          console.log(type)
+          console.log(type);
           addToQueue(data);
         } else if (type === `new-vote/${spaceId}`) {
           setQueue((prev) => {
@@ -99,12 +98,11 @@ export default function StreamView({
         }
         return json.activeStream.stream;
       });
-      setSpaceName(json.spaceName)
-      
+      setSpaceName(json.spaceName);
     } catch (error) {
       enqueueToast("error", "Something went wrong");
     }
-  
+
     setPlayNextLoader(false);
   }
 
@@ -130,10 +128,10 @@ export default function StreamView({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Appbar isSpectator={!playVideo}/>
-      <div className='mx-auto text-2xl bg-gradient-to-r rounded-lg from-indigo-600 to-violet-800 font-bold'>
-            {spaceName}
-            </div>
+      <Appbar isSpectator={!playVideo} />
+      <div className="mx-auto rounded-lg bg-gradient-to-r from-indigo-600 to-violet-800 text-2xl font-bold">
+        {spaceName}
+      </div>
       <div className="flex justify-center">
         <div className="grid w-screen max-w-screen-xl grid-cols-1 gap-4 pt-8 md:grid-cols-5">
           <Queue

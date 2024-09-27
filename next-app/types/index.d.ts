@@ -10,5 +10,5 @@ interface Video {
   userId: string;
   upvotes: number;
   haveUpvoted: boolean;
-  spaceId:string
+  spaceId: string;
 }

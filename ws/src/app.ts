@@ -37,7 +37,7 @@ async function main() {
   wss.on("connection", (ws) => {
     ws.on("message", async (raw) => {
       const { type, data } = JSON.parse(raw.toString()) || {};
-      console.log(type)
+      console.log(type);
       if (type === "join-room") {
         jwt.verify(
           data.token,
@@ -51,7 +51,7 @@ async function main() {
                   data: {
                     message: "Token verification failed",
                   },
-                })
+                }),
               );
             } else {
               RoomManager.getInstance().joinRoom(
@@ -60,14 +60,13 @@ async function main() {
                 decoded.userId,
                 ws,
                 data.token,
-                
               );
             }
-          }
+          },
         );
       } else {
         const user = RoomManager.getInstance().users.get(data.userId);
-        
+
         // Adding this to verify the user who is sending this message is not mocking other user.
         if (user) {
           data.userId = user.userId;
@@ -76,13 +75,13 @@ async function main() {
               data.userId,
               data.streamId,
               data.vote,
-              data.spaceId
+              data.spaceId,
             );
           } else if (type === "add-to-queue") {
             await RoomManager.getInstance().addToQueue(
               data.spaceId,
               data.userId,
-              data.url
+              data.url,
             );
           } else if (type === "play-next") {
             await RoomManager.getInstance().queue.add("play-next", {
@@ -101,12 +100,12 @@ async function main() {
               spaceId: data.spaceId,
               userId: data.userId,
             });
-          } else if (type === "pay-and-play-next"){
+          } else if (type === "pay-and-play-next") {
             await RoomManager.getInstance().payAndPlayNext(
               data.spaceId,
               data.userId,
-              data.url
-            )
+              data.url,
+            );
           }
         } else {
           ws.send(
@@ -115,7 +114,7 @@ async function main() {
               data: {
                 message: "You are unauthorized to perform this action",
               },
-            })
+            }),
           );
         }
       }

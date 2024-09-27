@@ -6,8 +6,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 
-
-export function Appbar({ showThemeSwitch = true , isSpectator=false }) {
+export function Appbar({ showThemeSwitch = true, isSpectator = false }) {
   const session = useSession();
   const router = useRouter();
 
@@ -22,7 +21,7 @@ export function Appbar({ showThemeSwitch = true , isSpectator=false }) {
         Muzer
       </div>
       <div className="flex items-center gap-x-2">
-        {isSpectator && <WalletMultiButton/>}
+        {isSpectator && <WalletMultiButton />}
         {session.data?.user && (
           <Button
             className="bg-purple-600 text-white hover:bg-purple-700"
@@ -60,7 +59,7 @@ export function Appbar({ showThemeSwitch = true , isSpectator=false }) {
             </Link>
           </div>
         )}
-        
+
         {showThemeSwitch && <ThemeSwitcher />}
       </div>
     </div>

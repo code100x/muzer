@@ -7,79 +7,70 @@ import ErrorScreen from "@/components/ErrorScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter } from "next/navigation";
 
-
 // Default styles that can be overridden by your app
-import '@solana/wallet-adapter-react-ui/styles.css';
+import "@solana/wallet-adapter-react-ui/styles.css";
 
-
-
-export default function Component({params:{spaceId}}:{params:{spaceId:string}}) {
-
-
+export default function Component({
+  params: { spaceId },
+}: {
+  params: { spaceId: string };
+}) {
   const { socket, user, loading, setUser, connectionError } = useSocket();
 
-
-  const [creatorId,setCreatorId]=useState<string>();
+  const [creatorId, setCreatorId] = useState<string>();
   const [loading1, setLoading1] = useState(true);
   const router = useRouter();
 
- 
- 
-  console.log(spaceId)
-  
-  useEffect(()=>{
-    async function fetchHostId(){
+  console.log(spaceId);
+
+  useEffect(() => {
+    async function fetchHostId() {
       try {
-        const response = await fetch(`/api/spaces/?spaceId=${spaceId}`,{
-          method:"GET"
+        const response = await fetch(`/api/spaces/?spaceId=${spaceId}`, {
+          method: "GET",
         });
-        const data = await response.json()
+        const data = await response.json();
         if (!response.ok || !data.success) {
           throw new Error(data.message || "Failed to retreive space's host id");
         }
-        setCreatorId(data.hostId)
-       
-
+        setCreatorId(data.hostId);
       } catch (error) {
-        
-      }
-      finally{
-        setLoading1(false)
+      } finally {
+        setLoading1(false);
       }
     }
     fetchHostId();
-  },[spaceId])
-
- 
+  }, [spaceId]);
 
   useEffect(() => {
     if (user && socket && creatorId) {
-      const token =  user.token || jwt.sign(
-        {
-          creatorId: creatorId,
-          userId: user?.id,
-        },
-        process.env.NEXT_PUBLIC_SECRET || "",
-        {
-          expiresIn: "24h",
-        }
-      );
+      const token =
+        user.token ||
+        jwt.sign(
+          {
+            creatorId: creatorId,
+            userId: user?.id,
+          },
+          process.env.NEXT_PUBLIC_SECRET || "",
+          {
+            expiresIn: "24h",
+          },
+        );
 
       socket?.send(
         JSON.stringify({
           type: "join-room",
           data: {
             token,
-            spaceId
+            spaceId,
           },
-        })
+        }),
       );
-      if(!user.token){
+      if (!user.token) {
         setUser({ ...user, token });
       }
-      
     }
-  }, [user,spaceId,creatorId,socket]);
+  }, [user, spaceId, creatorId, socket]);
 
   if (connectionError) {
     return <ErrorScreen>Cannot connect to socket server</ErrorScreen>;
@@ -92,19 +83,21 @@ export default function Component({params:{spaceId}}:{params:{spaceId:string}}) 
   if (!user) {
     return <ErrorScreen>Please Log in....</ErrorScreen>;
   }
-  if(loading1){
-  return <LoadingScreen></LoadingScreen>
+  if (loading1) {
+    return <LoadingScreen></LoadingScreen>;
   }
 
-  if(creatorId===user.id){
-    router.push(`/dashboard/${spaceId}`)
+  if (creatorId === user.id) {
+    router.push(`/dashboard/${spaceId}`);
   }
 
-
-  
-  
-  return <StreamView creatorId={creatorId as string} playVideo={false} spaceId={spaceId} />;
-  
+  return (
+    <StreamView
+      creatorId={creatorId as string}
+      playVideo={false}
+      spaceId={spaceId}
+    />
+  );
 }
 
 export const dynamic = "auto";

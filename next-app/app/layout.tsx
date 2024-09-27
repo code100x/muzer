@@ -24,7 +24,9 @@ const globalToastOptions: ToastContainerProps = {
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://muzer.100xdevs.com/"),
+  metadataBase: new URL(
+    process.env.NEXTAUTH_URL || "https://muzer.100xdevs.com/",
+  ),
   keywords:
     "music stream, fan interaction, live streaming, high-quality audio, curate music, Muzer",
   title: "Muzer | Fan-Curated Live Music Streaming",
@@ -52,7 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-[#1b1934b2]`}>
-       <ToastContainer {...globalToastOptions}/>
+        <ToastContainer {...globalToastOptions} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
