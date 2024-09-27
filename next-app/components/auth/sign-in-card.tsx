@@ -29,7 +29,7 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
           email,
           password,
           redirect: false,
-          callbackUrl: "/",
+          callbackUrl: "/home",
         });
         res.then((res) => {
           if (res?.error) {
@@ -44,7 +44,7 @@ export default function SigninCard({ setFormType: setState }: SigninCardProps) {
       if (provider === "google") {
         const res = signIn(provider, {
           redirect: false,
-          callbackUrl: "/",
+          callbackUrl: "/home",
         });
         res.then((res) => {
           if (res?.error) {

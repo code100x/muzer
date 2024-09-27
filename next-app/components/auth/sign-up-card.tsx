@@ -36,7 +36,7 @@ export default function SignupCard({ setFormType: setState }: SignupCardProps) {
           email,
           password,
           redirect: false,
-          callbackUrl: "/",
+          callbackUrl: "/home",
         });
         res.then((res) => {
           if (res?.error) {
@@ -51,7 +51,7 @@ export default function SignupCard({ setFormType: setState }: SignupCardProps) {
       if (provider === "google") {
         const res = signIn(provider, {
           redirect: false,
-          callbackUrl: "/",
+          callbackUrl: "/home",
         });
         res.then((res) => {
           if (res?.error) {
