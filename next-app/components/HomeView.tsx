@@ -76,9 +76,9 @@ export default function HomeView() {
         const updatedSpaces: Space[] = prev ? [...prev, newSpace] : [newSpace];
         return updatedSpaces;
       });
-      toast.success(data.message); // Use Sonner for toast notifications
+      toast.success(data.message); 
     } catch (error: any) {
-      toast.error(error.message || "Error Creating Space"); // Use Sonner for toast notifications
+      toast.error(error.message || "Error Creating Space"); 
     }
   };
 
@@ -98,9 +98,9 @@ export default function HomeView() {
           : [];
         return updatedSpaces;
       });
-      toast.success(data.message); // Use Sonner for toast notifications
+      toast.success(data.message);
     } catch (error: any) {
-      toast.error(error.message || "Error Deleting Space"); // Use Sonner for toast notifications
+      toast.error(error.message || "Error Deleting Space"); 
     }
   };
 
