@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronUp, ChevronDown, Share2, Play, Trash2, X, MessageCircle, Instagram, Twitter} from "lucide-react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "sonner";
 import { Appbar } from "./Appbar";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
@@ -218,26 +217,10 @@ export default function StreamView({
 
     if (platform === 'clipboard') {
       navigator.clipboard.writeText(shareableLink).then(() => {
-        toast.success('Link copied to clipboard!', {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        })
+        toast.success('Link copied to clipboard!')
       }).catch((err) => {
         console.error('Could not copy text: ', err)
-        toast.error('Failed to copy link. Please try again.', {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        })
+        toast.error('Failed to copy link. Please try again.')
       })
     } else {
       let url
@@ -251,15 +234,7 @@ export default function StreamView({
         case 'instagram':
           // Instagram doesn't allow direct URL sharing, so we copy the link instead
           navigator.clipboard.writeText(shareableLink)
-          toast.success('Link copied for Instagram sharing!', {
-            position: 'top-right',
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          })
+          toast.success('Link copied for Instagram sharing!')
           return
         default:
           return
@@ -518,18 +493,6 @@ export default function StreamView({
           </div>
         </div>
       </div>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
       <Dialog
         open={isEmptyQueueDialogOpen}
         onOpenChange={setIsEmptyQueueDialogOpen}

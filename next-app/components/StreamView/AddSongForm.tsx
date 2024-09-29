@@ -49,7 +49,7 @@ export default function AddSongForm({
         url: inputLink,
       });
     } else {
-      enqueueToast("error", "Invalid please use specified formate");
+      enqueueToast("error", "Invalid please use specified format");
     }
     setLoading(false);
     setInputLink("");
