@@ -10,6 +10,6 @@ export default async function Home(){
   if (!session?.user.id) {
     return <h1>Please Log in....</h1>;
   }
- return <HomeView></HomeView>
+  return <HomeView></HomeView>
 
 }

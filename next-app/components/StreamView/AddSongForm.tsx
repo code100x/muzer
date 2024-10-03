@@ -67,32 +67,46 @@ export default function AddSongForm({
     }
     try{
       setLoading(true);
-      const transaction = new Transaction();
-      transaction.add(
-          SystemProgram.transfer({
-              fromPubkey: wallet.publicKey,
-              toPubkey: new PublicKey(process.env.NEXT_PUBLIC_PUBLICKEY as string),
-              lamports: Number(process.env.NEXT_PUBLIC_SOL_PER_PAYMENT) * LAMPORTS_PER_SOL,
+
+
+      // check if user creds for this space is pending or not 
+      const response = await fetch(`/api/remcreds`,{
+          method:"POST",
+          body:JSON.stringify({
+            spaceId:spaceId,
           })
-      )
-
-      // sign Transaction steps 
-      const blockHash = await connection.getLatestBlockhash();
-      transaction.feePayer = wallet.publicKey;
-      transaction.recentBlockhash = blockHash.blockhash;
-      //@ts-ignore
-      const signed = await wallet.signTransaction(transaction);
-      
-
-      const signature = await connection.sendRawTransaction(signed.serialize());
-      
-      enqueueToast("success", `Transaction signature: ${signature}`);
-      await connection.confirmTransaction({
-          blockhash: blockHash.blockhash,
-          lastValidBlockHeight: blockHash.lastValidBlockHeight,
-          signature
       });
-      enqueueToast("success", `Payment successful`);
+      const data = await response.json();
+
+      if(!data.ok){
+        const transaction = new Transaction();
+        transaction.add(
+            SystemProgram.transfer({
+                fromPubkey: wallet.publicKey,
+                toPubkey: new PublicKey(process.env.NEXT_PUBLIC_PUBLICKEY as string),
+                lamports: Number(process.env.NEXT_PUBLIC_SOL_PER_PAYMENT) * LAMPORTS_PER_SOL,
+            })
+        )
+
+        // sign Transaction steps 
+        const blockHash = await connection.getLatestBlockhash();
+        transaction.feePayer = wallet.publicKey;
+        transaction.recentBlockhash = blockHash.blockhash;
+        //@ts-ignore
+        const signed = await wallet.signTransaction(transaction);
+        
+
+        const signature = await connection.sendRawTransaction(signed.serialize());
+        
+        enqueueToast("success", `Transaction signature: ${signature}`);
+        await connection.confirmTransaction({
+            blockhash: blockHash.blockhash,
+            lastValidBlockHeight: blockHash.lastValidBlockHeight,
+            signature
+        });
+        enqueueToast("success", `Payment successful`);
+      }
+      
       sendMessage("pay-and-play-next", {
         spaceId,
         userId: user?.id,
