@@ -115,7 +115,9 @@ export default function StreamView({
       userId: user?.id,
     });
   };
-
+  const checkIsDuplicate = (url:string)=>{
+    return queue.some((video)=>video.url===url)
+  }
   const enqueueToast = (type: "error" | "success", message: string) => {
     toast[type](message, {
       position: "top-right",
@@ -155,6 +157,7 @@ export default function StreamView({
                 setLoading={setLoading}
                 spaceId={spaceId}
                 isSpectator={!playVideo}
+                checkIsDuplicate={checkIsDuplicate}
               />
               <NowPlaying
                 currentVideo={currentVideo}

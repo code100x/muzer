@@ -1,6 +1,6 @@
 import { YT_REGEX } from "@/lib/utils";
 import { useSocket } from "@/context/socket-context";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +20,8 @@ type Props = {
   loading: boolean;
   enqueueToast: (type: "error" | "success", message: string) => void;
   spaceId:string,
-  isSpectator:boolean
+  isSpectator:boolean,
+  checkIsDuplicate:(url:string)=>boolean
 };
 
 export default function AddSongForm({
@@ -32,11 +33,14 @@ export default function AddSongForm({
   userId,
   spaceId,
   isSpectator,
+  checkIsDuplicate
 }: Props) {
   const { sendMessage } = useSocket();
   const wallet = useWallet();
   const {connection} = useConnection();
   const user = useSession().data?.user;
+  const [duplicateDiv, setDuplicateDiv] = useState(false);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,21 +59,12 @@ export default function AddSongForm({
     setInputLink("");
   };
 
-  const handlePayAndPlay = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const finallyPlaySong = async (songLink:string)=>{
     if(!wallet.publicKey || !connection){
       enqueueToast("error", "Please connect your wallet");
       return;
     }
-    if (!inputLink.match(YT_REGEX)) {
-      enqueueToast("error", "Invalid please use specified formate");
-    }
-    try{
-      setLoading(true);
-
-
-      // check if user creds for this space is pending or not 
+    // check if user creds for this space is pending or not 
       const response = await fetch(`/api/remcreds`,{
           method:"POST",
           body:JSON.stringify({
@@ -110,31 +105,81 @@ export default function AddSongForm({
       sendMessage("pay-and-play-next", {
         spaceId,
         userId: user?.id,
-        url:inputLink
+        url:songLink
       });
+  }
+
+  const handlePayAndPlay = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if(!wallet.publicKey || !connection){
+      enqueueToast("error", "Please connect your wallet");
+      return;
+    }
+    if (!inputLink.match(YT_REGEX)) {
+      enqueueToast("error", "Invalid please use specified formate");
+    }
+    try{
+      setLoading(true);
+
+      //check if it is duplicate or not if it is accepted by user then play 
+      if(checkIsDuplicate(inputLink)){
+        
+        if(!duplicateDiv){
+          setDuplicateDiv(true);
+          return;
+        }
+        if(duplicateDiv){
+          
+          setDuplicateDiv(false);
+          await finallyPlaySong(inputLink);
+          setLoading(false);
+        }
+        return;
+      }
+      await finallyPlaySong(inputLink);
+
     }
     catch(error){
       enqueueToast("error", `Payment unsuccessful`);
     }
     setLoading(false);
 
-  };
+  },[ duplicateDiv,wallet , connection, inputLink]);
 
   const videoId = inputLink ? inputLink.match(YT_REGEX)?.[1] : undefined;
 
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Add a song</h1>
+        <h1 className="text-xl font-bold">Add a song</h1>  
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-2">
+      <form onSubmit={handleSubmit} className="space-y-2 relative">
         <Input
           type="text"
           placeholder="Please paste your link"
           value={inputLink}
           onChange={(e) => setInputLink(e.target.value)}
         />
+        { duplicateDiv &&
+          <div className="w-full z-10 absolute top-10  right-0 transition-all ease-in duration-500 bg-black rounded-md flex flex-col gap-3 px-4 py-2 justify-center items-center ">
+            <h1 className="font-semibold text-lg">Duplicate Song</h1>
+            <Button 
+              className="w-full"
+              type="submit"
+              onClick={handlePayAndPlay}
+            >
+              Accept
+            </Button>
+            <Button 
+              className="w-full bg-red-500 hover:bg-red-400"
+              onClick={()=>{setDuplicateDiv(false);setLoading(false)}}
+              >
+              Cancel
+            </Button>
+          </div>
+        }
         <Button
           disabled={loading}
           onClick={handleSubmit}
