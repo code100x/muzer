@@ -14,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  provider     Provider
-  streams      Stream[] @relation("user")
-  upvotes      Upvote[]
-  addedStreams Stream[] @relation("addedBy")
-  hostedSpaces  Space[]  @relation("hostedBy")
+  id             String           @id @default(uuid())
+  email          String           @unique
+  provider       Provider
+  streams        Stream[]         @relation("user")
+  upvotes        Upvote[]
+  addedStreams   Stream[]         @relation("addedBy")
+  hostedSpaces   Space[]          @relation("hostedBy")
+  remainingCreds RemainingCreds[]
 }
 
 model Stream {
@@ -41,17 +42,17 @@ model Stream {
   currentStream CurrentStream?
   addedBy       String
   addedByUser   User           @relation("addedBy", fields: [addedBy], references: [id])
-  spaceId      String?
-  space        Space?      @relation("spaceStreams", fields: [spaceId], references: [id],onDelete: Cascade)
+  spaceId       String?
+  space         Space?         @relation("spaceStreams", fields: [spaceId], references: [id], onDelete: Cascade)
 }
 
 model CurrentStream {
-  id            String @id @default(uuid())
-  userId       String  
+  id       String  @id @default(uuid())
+  userId   String
   streamId String? @unique
   stream   Stream? @relation(fields: [streamId], references: [id])
-  spaceId     String? @unique
-  space    Space?    @relation(fields: [spaceId], references: [id],onDelete: Cascade)
+  spaceId  String? @unique
+  space    Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 }
 
 model Upvote {
@@ -63,15 +64,29 @@ model Upvote {
 
   @@unique([userId, streamId])
 }
+
 model Space {
-  id            String      @id @default(uuid())
-  name          String
-  streams        Stream[]     @relation("spaceStreams")
-  hostId        String
-  host          User        @relation("hostedBy", fields: [hostId], references: [id])
-  isActive      Boolean     @default(true)
-  currentStream CurrentStream?
+  id             String           @id @default(uuid())
+  name           String
+  streams        Stream[]         @relation("spaceStreams")
+  hostId         String
+  host           User             @relation("hostedBy", fields: [hostId], references: [id])
+  isActive       Boolean          @default(true)
+  currentStream  CurrentStream?
+  remainingCreds RemainingCreds[]
 }
+
+model RemainingCreds {
+  id             String @id @default(uuid())
+  userId         String
+  user           User   @relation(fields: [userId], references: [id])
+  spaceId        String
+  space          Space  @relation(fields: [spaceId], references: [id])
+  remainingCreds Int
+
+  @@unique([userId, spaceId])
+}
+
 enum StreamType {
   Spotify
   Youtube
