@@ -13,18 +13,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    develop:
-      watch:
-        - action: sync
-          path: ./next-app
-          target: /usr/src/app
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: ./next-app/package.json
-          target: /usr/src/app
-          ignore:
-            - node_modules/
+    volumes:
+      - ./next-app:/usr/src/app
+      - /usr/src/app/node_modules
 
   postgres:
     container_name: prisma-postgres
@@ -49,7 +40,8 @@ services:
     env_file:
       - path: ./next-app/.env
     depends_on:
-      - app
+      - postgres:
+        condition: service_healthy
     ports:
       - ${PRISMA_STUDIO_PORT}:5555
 
@@ -87,18 +79,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    develop:
-      watch:
-        - action: sync
-          path: ./ws
-          target: /usr/src/app
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: ./ws/package.json
-          target: /usr/src/app
-          ignore:
-            - node_modules/
+    volumes:
+      - ./ws:/usr/src/app
+      - /usr/src/app/node_modules
 
 volumes:
   postgres-data:
