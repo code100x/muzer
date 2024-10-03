@@ -80,6 +80,9 @@ export default function StreamView({
     setInputLink("");
     setLoading(false);
   }
+  const checkIsDuplicate = (url:string)=>{
+    return (queue.some((video)=>video.url===url) || currentVideo?.url===url)
+  }
 
   async function refreshStreams() {
     try {
@@ -149,6 +152,7 @@ export default function StreamView({
                 setLoading={setLoading}
                 spaceId={spaceId}
                 isSpectator={!playVideo}
+                checkIsDuplicate={checkIsDuplicate}
               />
               <NowPlaying
                 currentVideo={currentVideo}
