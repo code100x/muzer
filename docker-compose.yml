@@ -33,17 +33,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # prisma-studio:
-  #   container_name: prisma-studio
-  #   image: timothyjmiller/prisma-studio:latest
-  #   restart: unless-stopped
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   ports:
-  #     - "5555:5555"
-
+      
   redis:
     container_name: redis-server
     image: redis/redis-stack:latest
