@@ -28,7 +28,7 @@
 
 4. Run the following command to start the application:
    ```bash
-   docker compose --env-file ./next-app/.env --env-file ./ws/.env up -d   
+   docker compose up -d   
    ```
 
 ### Without Docker
