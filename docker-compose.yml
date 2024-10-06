@@ -2,12 +2,13 @@ services:
   app:
     container_name: muzer-docker
     build:
-      context: ./next-app/
+      context: ./next-app
       dockerfile: Dockerfile.dev
     env_file:
-      - path: ./next-app/.env
+      - ./next-app/.env
     ports:
-      - ${APP_PORT}:3000
+      - "3000:3000"
+      - "5555:5555"
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,9 +23,9 @@ services:
     image: postgres:alpine
     restart: always
     env_file:
-      - path: ./next-app/.env
+      - ./next-app/.env
     ports:
-      - ${POSTGRES_PORT}:5432
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -33,29 +34,27 @@ services:
       timeout: 5s
       retries: 5
 
-  prisma-studio:
-    container_name: prisma-studio
-    image: timothyjmiller/prisma-studio:latest
-    restart: unless-stopped
-    env_file:
-      - path: ./next-app/.env
-    depends_on:
-      - postgres:
-        condition: service_healthy
-    ports:
-      - ${PRISMA_STUDIO_PORT}:5555
+  # prisma-studio:
+  #   container_name: prisma-studio
+  #   image: timothyjmiller/prisma-studio:latest
+  #   restart: unless-stopped
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   ports:
+  #     - "5555:5555"
 
   redis:
     container_name: redis-server
     image: redis/redis-stack:latest
     restart: always
     env_file:
-      - path: ./ws/.env
+      - ./ws/.env
     ports:
-      - ${REDIS_PORT}:6379
-      - ${REDIS_BROWSER_STACK_PORT}:8001
+      - "6379:6379"
+      - "8001:8001"
     environment:
-      REDIS_ARGS: "--requirepass ${REDIS_PASSWORD} --user ${REDIS_USERNAME} on >${REDIS_PASSWORD} ~* allcommands --user default off nopass nocommands"
+      REDIS_ARGS: "--requirepass root --user admin on >root ~* allcommands --user default off nopass nocommands"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -68,12 +67,12 @@ services:
     container_name: websockets
     restart: always
     build:
-      context: ./ws/
+      context: ./ws
       dockerfile: Dockerfile.dev
     env_file:
-      - path: ./ws/.env
+      - ./ws/.env
     ports:
-      - ${PORT}:8080
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
