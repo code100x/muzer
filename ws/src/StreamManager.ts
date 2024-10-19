@@ -298,94 +298,149 @@ export class RoomManager {
       });
     });
   }
-
   async payAndPlayNext(spaceId: string, userId: string, url: string) {
     const creatorId = this.spaces.get(spaceId)?.creatorId;
     console.log("payAndPlayNext", creatorId, userId);
+
     let targetUser = this.users.get(userId);
     if (!targetUser || !creatorId) {
       return;
     }
-
-    const extractedId = getVideoId(url);
-
-    if (!extractedId) {
-      targetUser?.ws.forEach((ws) => {
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            data: { message: "Invalid YouTube URL" },
-          })
-        );
-      });
-      return;
-    }
+    const extractedId = url.split("?v=")[1];
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
-
+    
     if (res.thumbnail) {
-      const thumbnails = res.thumbnail.thumbnails;
-      thumbnails.sort((a: { width: number }, b: { width: number }) =>
-        a.width < b.width ? -1 : 1
-      );
-      const stream = await this.prisma.stream.create({
-        data: {
-          id: crypto.randomUUID(),
-          userId: creatorId,
-          url: url,
-          extractedId,
-          type: "Youtube",
-          addedBy: userId,
-          title: res.title ?? "Cant find video",
-          // smallImg: video.thumbnails.medium.url,
-          // bigImg: video.thumbnails.high.url,
-          smallImg:
-            (thumbnails.length > 1
-              ? thumbnails[thumbnails.length - 2].url
-              : thumbnails[thumbnails.length - 1].url) ??
-            "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
-          bigImg:
-            thumbnails[thumbnails.length - 1].url ??
-            "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
-          spaceId: spaceId,
-        },
-      });
-      // update currentStream
-      await Promise.all([
-        this.prisma.currentStream.upsert({
-          where: {
-            spaceId: spaceId,
-          },
-          update: {
-            spaceId: spaceId,
-            userId,
-            streamId: stream.id,
-          },
-          create: {
-            id: crypto.randomUUID(),
-            spaceId: spaceId,
-            userId,
-            streamId: stream.id,
-          },
-        }),
-        this.prisma.stream.update({
-          where: {
-            id: stream.id,
-          },
+
+      try{
+        const thumbnails = res.thumbnail.thumbnails;
+        thumbnails.sort((a: { width: number }, b: { width: number }) =>
+          a.width < b.width ? -1 : 1
+        );
+        const stream = await this.prisma.stream.create({
           data: {
-            played: true,
-            playedTs: new Date(),
+            id: crypto.randomUUID(),
+            userId: creatorId,
+            url: url,
+            extractedId,
+            type: "Youtube",
+            addedBy: userId,
+            title: res.title ?? "Cant find video",
+            // smallImg: video.thumbnails.medium.url,
+            // bigImg: video.thumbnails.high.url,
+            smallImg:
+              (thumbnails.length > 1
+                ? thumbnails[thumbnails.length - 2].url
+                : thumbnails[thumbnails.length - 1].url) ??
+              "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+            bigImg:
+              thumbnails[thumbnails.length - 1].url ??
+              "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+            spaceId:spaceId
           },
-        }),
-      ]);
-      await this.publisher.publish(
-        spaceId,
-        JSON.stringify({
-          type: "play-next",
+          
+        });
+        // update currentStream
+          await Promise.all([
+          this.prisma.currentStream.upsert({
+            where: {
+              spaceId:spaceId,
+            },
+            update: {
+              spaceId:spaceId,
+              userId,
+              streamId: stream.id,
+            },
+            create: {
+              id: crypto.randomUUID(),
+              spaceId:spaceId,
+              userId,
+              streamId: stream.id,
+            },
+          }),
+          this.prisma.stream.update({
+            where: {
+              id: stream.id,
+            },
+            data: {
+              played: true,
+              playedTs: new Date(),
+            },
+          }),
+        ]);
+        await this.publisher.publish(
+          spaceId,
+          JSON.stringify({
+            type: "play-next",
+          })
+        );
+
+        const remainingCreds = await this.prisma.remainingCreds.findUnique({
+          where:{
+            userId_spaceId:{
+              spaceId:spaceId,
+              userId:userId,
+            }
+          }
         })
-      );
+        await this.prisma.$transaction(async (tx)=>{
+          if(remainingCreds){
+            if(remainingCreds.remainingCreds == 1){
+              // delete records 
+              await tx.remainingCreds.delete({
+                where:{
+                  userId_spaceId:{
+                    spaceId:spaceId,
+                    userId:userId,
+                  }
+                }
+              });
+            }
+            else{
+              // reduce creds 
+              await this.prisma.remainingCreds.update({
+                where:{
+                  userId_spaceId:{
+                    spaceId:spaceId,
+                    userId:userId,
+                  }
+                },
+                data:{
+                  remainingCreds:{
+                    decrement:1
+                  }
+                }
+              })
+
+            }
+          }
+        })
+      }
+      catch(error){
+        // add credits to user
+        await this.prisma.remainingCreds.upsert({
+            where:{
+                userId_spaceId:{
+                    spaceId: (spaceId as string),
+                    userId: (userId as string),
+                }
+            },
+            create:{
+                userId: (userId as string),
+                spaceId: (spaceId as string),
+                remainingCreds: 1,
+            },
+            update:{
+                remainingCreds:{
+                    increment:1
+                }
+            }
+        });
+      }
     }
+
   }
+
 
   async adminPlayNext(spaceId: string, userId: string) {
     const creatorId = this.spaces.get(spaceId)?.creatorId;
