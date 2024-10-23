@@ -15,11 +15,13 @@
 ### With Docker
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/code100x/muzer.git
    ```
 
 2. Navigate to the project directory:
+
    ```bash
    cd muzer
    ```
@@ -28,17 +30,19 @@
 
 4. Run the following command to start the application:
    ```bash
-   docker compose up -d   
+   docker compose up -d
    ```
 
 ### Without Docker
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/code100x/muzer.git
    ```
 
 2. Navigate to the project directory:
+
    ```bash
    cd muzer
    ```
@@ -48,23 +52,25 @@
    cd next-app
    pnpm install
    cd ..
-   cd ws 
+   cd ws
    pnpm install
    ```
 4. Create a `.env` file based on the `.env.example` file and configure everything in both the `next-app` and `ws` folders.
 
 5. For postgres, you need to run the following command:
+
    ```bash
    docker run -d \
    --name muzer-db \
-   -e POSTGRES_USER=myuser \
-   -e POSTGRES_PASSWORD=mypassword \
+   -e POSTGRES_USER=postgres \
+   -e POSTGRES_PASSWORD=postgres \
    -e POSTGRES_DB=mydatabase \
    -p 5432:5432 \
    postgres
    ```
 
 6. For redis, you need to run the following command:
+
    ```bash
    docker run -d \
    --name muzer-redis \
@@ -73,19 +79,21 @@
    -e REDIS_PORT=6379 \
    -e REDIS_HOST="127.0.0.1" \
    -e REDIS_BROWSER_STACK_PORT=8001 \
-   redis/redis-stack:latest 
+   redis/redis-stack:latest
    ```
 
 7. Now do the following:
+
    ```bash
    cd next-app
    pnpm postinstall
    cd ..
-   cd ws 
+   cd ws
    pnpm postinstall
    ```
 
 8. Run the following command to start the application:
+
    ```bash
     cd next-app
     pnpm dev
@@ -100,7 +108,7 @@
    pnpm run prisma:studio
    ```
 
-## Usage 
+## Usage
 
 1. Access the application in your browser at http://localhost:3000
 2. Access the redis stack at http://localhost:8001/redis-stack/browser
